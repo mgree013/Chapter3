@@ -1,6 +1,6 @@
 # Chapter3
 
-Title: Effects of fish on stream amcroivnertebrate and lake zooplankton communites
+Title: Effects of fish on stream macroinvertebrate and lake zooplankton communities
 
 Status of MS: In Prep
 
