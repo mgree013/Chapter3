@@ -581,13 +581,14 @@ semPaths(smod3.fit, what='std', layout = "tree3", intercepts = FALSE, residuals 
 
 ####################################################################################################################################################################################################################################################################################################
 #Fish by Elevation
-env_div%>%
+lake.elev.fish<-env_div%>%
   ggplot(aes(x = actual_fish_presence, y = lake_elevation_nbr, fill=actual_fish_presence))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+
-  labs(fill='Elevation (m)') +
-  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  ggtitle("a)") +
+  ylab("Elevation (m)")+
+#scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ####################################################################################################################################################################################################################################################################################################

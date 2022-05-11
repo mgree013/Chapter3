@@ -491,15 +491,17 @@ datasz%>%
 ############################################################################################################################################
 
 #Fish  By Elevation
-diversity.env%>%
+stream.elev.fish<-diversity.env%>%
   ggplot(aes(x = as.factor(Fish), y = Elevation, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+
-  labs(fill='Elevation (m)') +
+  ggtitle("b)") +
+  ylab("Elevation (m)")+
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+
+  theme(legend.position = c(0.25, 0.15),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 
 ############################################################################################################################################
