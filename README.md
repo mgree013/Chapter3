@@ -36,5 +36,5 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 # Supplemental
 
 ### Fig S1: Fish presence as a function of elevation (m) for lakes and streams.
-![](Newfigs/fig7.png)
+![](Newfigs/FigS1.png)
 
