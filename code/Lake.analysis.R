@@ -220,6 +220,33 @@ env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
+fig2a<-env_div%>%
+  ggplot(aes(x=actual_fish_presence, y=N1, fill=as.factor(actual_fish_presence)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Species (Shannon) Diversity")+
+  ggtitle("a)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+fig2b<-env_div%>%
+  ggplot(aes(x=actual_fish_presence, y=Com.Size, fill=as.factor(actual_fish_presence)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Community Size")+
+  ggtitle("b)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+fig2c<-env_div%>%
+  ggplot(aes(x=actual_fish_presence, y=betas.LCBD, fill=as.factor(actual_fish_presence)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
+  ggtitle("c)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
 #remove unwanted columns for analysis due to missing data
 env_divz<-env_div%>%
   dplyr::select(c(N0, H, N1, N2, E10, E20, J, Com.Size, betas.LCBD,actual_fish_presence, lake_drainage_name,Jurisdicti))
