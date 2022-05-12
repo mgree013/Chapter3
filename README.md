@@ -27,7 +27,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ### Fig 2: Zooplankton (a-c) and macroinvertebrate (d-f) community diversity response as a function of fish presence.
 ![](Newfigs/Fig2.png)
 
-### Fig 3: 
+### Fig 3: Zooplankton (a-c) and macroinvertebrate (d-f) community diversity along an elevational gradient.
 ![](Newfigs/Fig3.png)
 
 ### Fig 4:  Ordination of zooplankton  (a) and macroinvertebrate (b) species from Sierra Nevada, CA as a function  of  fish and elevation
@@ -36,8 +36,11 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ### Fig 5: CWM of zooplankton (a) and macroinvertebrate (b) community biomass as a function of fish presence.
 ![](Newfigs/Fig5.png)
 
-### Fig 6:CWM of zooplankton (a) and macroinvertebrate (b) community biomass along an elevational gradient.
+### Fig 6: CWM of zooplankton (a) and macroinvertebrate (b) community biomass along an elevational gradient.
 ![](Newfigs/Fig6.png)
+
+### Fig 7: Beta diversity of zooplankton (a) and macroinvertebrate (b) communities as a function of fish.
+![](Newfigs/Fig7.png)
 
 # Supplemental
 
