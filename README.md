@@ -36,8 +36,11 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ### Fig 5: CWM of zooplankton (a) and macroinvertebrate (b) community biomass as a function of fish presence.
 ![](Newfigs/Fig5.png)
 
-### Fig 6:CWM of zooplankton (a) and macroinvertebrate (b) community biomass along an elevational gradient.
+### Fig 6: CWM of zooplankton (a) and macroinvertebrate (b) community biomass along an elevational gradient.
 ![](Newfigs/Fig6.png)
+
+### Fig 7: Beta diversity of zooplankton (a) and macroinvertebrate (b) communities as a function of fish.
+![](Newfigs/Fig7.png)
 
 # Supplemental
 
