@@ -21,7 +21,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 
 # Results
 
-### Fig 1: Effects of  Fish on Species density. Only species that occur in both fish and fishless sites are included in this figure. 
+### Fig 1: Effects of  Fish on Species density. Only species that occur in both fish and fishless sites are included in this figure. The order of each x-axis is based on average body size, from smallest to largest species.
 ![](Newfigs/Fig1.png)
 
 ### Fig 2: Effects of Fish on Stream Macroivnertebrate and Lake zooplankton community diveristy
