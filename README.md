@@ -28,7 +28,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ![](Newfigs/Fig2.png)
 
 ### Fig 3: 
-![](Newfigs/fig7.png)
+![](Newfigs/Fig3.png)
 
 ### Fig 4:  Ordination of zooplankton and macroinvertebrate species from Sierra Nevada, CA as a function  of  fish and elevation
 ![](Newfigs/Fig4.1.png)
