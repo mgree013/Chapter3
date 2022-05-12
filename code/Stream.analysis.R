@@ -537,16 +537,19 @@ datasz%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
-datasz%>%
+fig5b<-datasz%>%
   filter(Fish != "NA")%>%
   ggplot(aes(x = as.factor(Fish), y = Body_mass_mg, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("no", "yes"))+
-  xlab("Fish Presence")+
+  xlab("Fish Presence")+ylab("CWM")+
   labs(fill='Fish Presence') +
+  ggtitle("b)") +
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.75, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
 
 #########################################################################
 #Visualize influence of fish and elevation
