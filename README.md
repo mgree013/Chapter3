@@ -12,6 +12,12 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 2) Plotting.R makes all figures used in the manuscript 
 3) Stream.Analysis.R Lake anlyses and organize code
 
+# Data
+
+1) Data Availability: Zooplankton data (Knapp et al. 2020) used in this study can be accessed from Environmental Data Initiative at https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2. 
+
+2) Macroinvertebrate data (Green et al. 2022) can be accessed from Dryad at https://doi.org/10.5061/dryad.2fqz612qw.![image](https://user-images.githubusercontent.com/32375195/168113156-d67ea2e6-2fad-45a3-b55e-616297291ada.png)
+
 
 # Results
 
