@@ -62,12 +62,13 @@ mtext("b)", side=side, line=line, cex=cex, adj=adj)
 
 dev.off()
 ###########################################################################
-# Figure 5:CWM
+# Figure 5:CWM  by Fish
 plot_grid(fig5a,fig5b,nrow=1)
 
 
 ###########################################################################
-# Figure 6
+# Figure 6:CWM  by Elevation
+plot_grid(fig6a,fig6b,nrow=1)
 
 
 ###########################################################################

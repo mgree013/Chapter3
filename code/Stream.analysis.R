@@ -513,7 +513,7 @@ datasz%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
-datasz%>%
+fig6b<-datasz%>%
   filter(Fish !="NA")%>%
   filter(Elevation>2790)%>%
   ggplot(aes(x = Elevation, y = Body_mass_mg, colour=as.factor(Fish)))+ #, colour=as.factor(Fish))) + #remove , fill=Network and see what the grpah looks like, are there tredns that both entowrks share together
@@ -521,10 +521,11 @@ datasz%>%
   #geom_smooth(method = "lm")+
   stat_smooth(method = glm, method.args = list(family = gaussian(link="identity")))+
   scale_color_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  theme_bw()+ylab("CWM")+xlab("Elevation (m)")+
-  facet_wrap(~as.factor(Fish),scales = "free")+
+  theme_bw()+ylab("CWM")+xlab("Elevation (m)")+  ggtitle("b)") +
+  facet_grid(~as.factor(Fish),scales = "free")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank(), legend.position = c(0.75, 0.87),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
 
 datasz%>%
   gather(Head.river.dist,River.dist.lake,key = "var", value = "value") %>% #PC2,PC3,PC4,River.dist.lake,
