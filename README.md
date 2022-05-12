@@ -22,7 +22,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 # Results
 
 ### Fig 1: Effects of  Fish on Species density
-![](Newfigs/fig7.png)
+![](Newfigs/Fig1.png)
 
 ### Fig 2: Effects of Fish on Stream Macroivnertebrate and Lake zooplankton community diveristy
 ![](Newfigs/fig7.png)
