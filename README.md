@@ -21,13 +21,13 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 
 # Results
 
-### Fig 1: Effects of  Fish on Species density. Only species that occur in both fish and fishless sites are included in this figure. The order of each x-axis is based on average body size, from smallest to largest species.
+### Fig 1: Individual zooplankton (a) and macroinvertebrate (b) species responses to fish presence. Only species that occur in both fish and fishless sites are included in this figure. The order of each x-axis is based on average body size, from smallest to largest species.
 ![](Newfigs/Fig1.png)
 
 ### Fig 2: Effects of Fish on Stream Macroivnertebrate and Lake zooplankton community diveristy
 ![](Newfigs/Fig2.png)
 
-### Fig 3: Effects of Elevation on Stream Macroivnertebrate and Lake zooplankton community diveristy
+### Fig 3: Zooplankton (a-c) and macroinvertebrate (d-f) community diversity response as a function of fish presence.
 ![](Newfigs/fig7.png)
 
 ### Fig 4:  Ordination of zooplankton and macroinvertebrate species from Sierra Nevada, CA as a function  of  fish and elevation
