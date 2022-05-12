@@ -109,11 +109,12 @@ species_mass_data_env_filter<-species_mass_data_env%>%
          Taxon !="Nixe" ,Taxon !="Ormosia" ,Taxon !="Pleuroceridae" ,Taxon !="Rhabdomastix" ,Taxon !="Sciara" ,Taxon !="Soyedina" ,Taxon !="Stictotarsus" ,
          Taxon !="Tabanus", Taxon !="Wormaldia", Taxon !="Wiedeman", Taxon !="Helodon", Taxon !="Tipula", Taxon !="Optioservus")
 
-species_mass_data_env_filter%>%
+fig1b<-species_mass_data_env_filter%>%
   filter(Fish !="NA")%>%
   ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = mean),y=log(abundance+1),fill=as.factor(Fish)))+
   geom_boxplot()+
-  xlab("Taxon")+ylab("Log Density")+
+  ggtitle("b)") +
+  xlab("Macroinvetebrate Taxa")+ylab("Macroinvetebrate Log Density + 1")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())

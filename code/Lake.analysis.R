@@ -286,7 +286,8 @@ env_abundz<-clean_zoopzz%>%
   dplyr::select(-c(Lecane_spp.,Monostyla_spp.,Simocephalus_serrulatus))%>%
   left_join(env, by=c("lake_id", "survey_date"))
 
-env_abundzzz<-env_abund%>%dplyr::rename(Taxon=Species_Name)%>%left_join(av_zoop_body_size_new, by="Taxon")
+av_zoop_body_size_news<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
+env_abundzzz<-env_abund%>%dplyr::rename(Taxon=Species_Name)%>%left_join(av_zoop_body_size_news, by="Taxon")%>%dplyr::rename(Mean_body_size_mm=mean_body_size)
 
 env_abundzzz%>%
   filter()%>%
@@ -298,6 +299,14 @@ env_abundzzz%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+env_abundzzz%>%
+  ggplot(aes(x=Taxon,y=log(zoop_density+1),fill=actual_fish_presence))+
+  geom_boxplot()+
+  facet_wrap(~Taxon, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Zooplankton Density")+xlab("Zooplankton Species")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
 
 ##########
 #Just Select Species that occur in fish and fishless sites
@@ -329,12 +338,13 @@ env_abundz_filter%>%
 env_abundz_filtered<-env_abundzzz%>%
   filter(Taxon !="Collotheca_spp." ,Taxon !="Eurycercus_lamellatus" ,Taxon !="Lecane_spp." ,Taxon !="Monostyla_spp." ,Taxon !="Polyarthra_vulgaris" ,Taxon !="Simocephalus_serrulatus" )
 
-env_abundz_filtered%>%
+fig1a<-env_abundz_filtered%>%
   ggplot(aes(x=reorder(Taxon, Mean_body_size_mm, FUN = median),y=log(zoop_density+1),fill=actual_fish_presence))+
   geom_boxplot()+
+  ggtitle("a)") +
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  ylab("Zooplankton Density")+xlab("Zooplankton Species")+
+  ylab("Zooplankton Log Density + 1")+xlab("Zooplankton Taxa")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
