@@ -25,7 +25,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ![](Newfigs/Fig1.png)
 
 ### Fig 2: Effects of Fish on Stream Macroivnertebrate and Lake zooplankton community diveristy
-![](Newfigs/fig7.png)
+![](Newfigs/Fig2.png)
 
 ### Fig 3: Effects of Elevation on Stream Macroivnertebrate and Lake zooplankton community diveristy
 ![](Newfigs/fig7.png)
