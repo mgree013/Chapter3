@@ -514,7 +514,7 @@ fig6a<-env_cwm%>%
   facet_grid(~actual_fish_presence)+
   xlab("Elevation (m)")+  ggtitle("a)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none",legend.box.background = element_rect(colour = "black"))
 
 env_cwm%>%
   ggplot(aes(x=log(lake_area_nbr+1),y=CWM,colour=actual_fish_presence))+
