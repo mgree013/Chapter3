@@ -11,10 +11,9 @@ plot_grid(fig1a,fig1b, nrow=2)
 # Figure 2
 plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f, nrow=2)
 
-
 ###########################################################################
 # Figure 3
-
+plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f, nrow=2)
 
 ###########################################################################
 # Figure 4

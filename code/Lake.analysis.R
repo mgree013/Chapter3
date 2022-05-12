@@ -159,6 +159,37 @@ env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
+
+fig3a<-env_div%>%
+  ggplot(aes(x=lake_elevation_nbr, y=N1))+
+  geom_point()+
+  geom_smooth(method = "lm",se=F)+
+  scale_color_viridis_d()+
+  ggtitle("a)") +
+  xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())
+
+fig3b<-env_div%>%
+  ggplot(aes(x=lake_elevation_nbr, y=Com.Size))+
+  geom_point()+
+  geom_smooth(method = "lm",se=F)+
+  scale_color_viridis_d()+
+  ggtitle("b)") +
+  xlab("Elevation (m)")+ylab("Community Size")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())
+
+fig3c<-env_div%>%
+  ggplot(aes(x=lake_elevation_nbr, y=betas.LCBD))+
+  geom_point()+
+  geom_smooth(method = "lm",se=F)+
+  scale_color_viridis_d()+
+  ggtitle("c)") +
+  xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())
+
 dog<-lm(N0~lake_elevation_nbr, data=env_div)
 dog<-glm(N0~lake_elevation_nbr,family = poisson(link = "log"), data=env_div)
 summary(dog)

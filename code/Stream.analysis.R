@@ -279,6 +279,32 @@ diversity.env%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
+fig3d<-diversity.env%>%
+  ggplot(aes(x=Elevation, y=N1))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  ggtitle("d)") +
+  xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
+fig3e<-diversity.env%>%
+  ggplot(aes(x=Elevation, y=Com.Size))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  ggtitle("e)") +
+  xlab("Elevation (m)")+ylab("Community Size")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
+fig3f<-diversity.env%>%  ggplot(aes(x=Elevation, y=betas.LCBD))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
+  ggtitle("f)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
 lm<-lm(betas.LCBD~Elevation,diversity.env)
 summary(lm)
 
