@@ -407,6 +407,7 @@ diversity.env%>%
 #NMDS
 species_env<-species%>%rownames_to_column("Site")%>%left_join(env, by="Site")%>%filter(Fish!="NA")
 species_2<-species_env%>%column_to_rownames("Site")%>%dplyr::select(c(Acentrella:Zapada))
+
 set.seed(99)
 species<-species_2
 dune.rel<-decostand(species,"total") #standardize community data
@@ -418,7 +419,7 @@ stressplot(dune.nmds) #this tells us if our plot is going to work, and it looks 
 plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
 #text(dune.nmds$species[,1], dune.nmds$species[,2], rownames(dune.nmds$species), cex=0.7, col ="black")
 points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
-ordihull(dune.nmds, groups=as.factor(species_env$Fish), draw="polygon", label=T)
+ordihull(dune.nmds, species_env$Fish, display="sites", label=F,lwd=2, col=c("blue","orange"))
 #ordihull(dune.nmds, groups=sp_abund_env$lake_drainage_name, draw="polygon", label=T)
 ordisurf(dune.nmds, species_env$Elevation, prioirty=,labcex=0.9, add = T,col="forestgreen")
 

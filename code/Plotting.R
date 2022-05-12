@@ -18,8 +18,40 @@ plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f, nrow=2)
 
 ###########################################################################
 # Figure 4
+par(mfrow=c(1,2))    # set the plotting area into a 1*2 array
+
+#lake
+set.seed(99)
+species<-sp_abund_env[,3:39]
+dune.rel<-decostand(species,"total") #standardize community data
+dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
+dune.nmds=metaMDS(dune.rel, k=2, try=10) #NMDS code
+dune.nmds
+#stressplot(dune.nmds)
+
+plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
+#text(dune.nmds$species[,1], dune.nmds$species[,2], rownames(dune.nmds$species), cex=0.7, col ="black")
+points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
+ordihull(dune.nmds, sp_abund_env$actual_fish_presence, display="sites", label=F,lwd=2, col=c("#440154FF","#FDE725FF"))
+ordisurf(dune.nmds, sp_abund_env$lake_elevation_nbr, prioirty=,labcex=0.9, add = T,col="forestgreen")
+
+#stream
+set.seed(99)
+species<-species_2
+dune.rel<-decostand(species,"total") #standardize community data
+dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
+dune.nmds=metaMDS(dune.rel, k=2, try=1000) #NMDS code
+dune.nmds
+#stressplot(dune.nmds) 
+
+plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
+points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
+ordihull(dune.nmds, species_env$Fish, display="sites", label=F,lwd=2, col=c("#440154FF","#FDE725FF"))
+ordisurf(dune.nmds, species_env$Elevation, prioirty=,labcex=0.9, add = T,col="forestgreen")
 
 
+
+dev.off()
 ###########################################################################
 # Figure 5
 

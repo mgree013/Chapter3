@@ -528,7 +528,7 @@ pseudoR1
 #########################################################################
 #2E) Multivariate Ordinations (NMDS)
 
-set.seed(29)
+set.seed(99)
 species<-sp_abund_env[,3:39]
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
@@ -539,8 +539,7 @@ stressplot(dune.nmds) #this tells us if our plot is going to work, and it looks 
 plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
 #text(dune.nmds$species[,1], dune.nmds$species[,2], rownames(dune.nmds$species), cex=0.7, col ="black")
 points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
-ordihull(dune.nmds, groups=sp_abund_env$actual_fish_presence, draw="polygon", label=T)
-#ordihull(dune.nmds, groups=sp_abund_env$lake_drainage_name, draw="polygon", label=T)
+ordihull(dune.nmds, sp_abund_env$actual_fish_presence, display="sites", label=F,lwd=2, col=c("blue","orange"))
 ordisurf(dune.nmds, sp_abund_env$lake_elevation_nbr, prioirty=,labcex=0.9, add = T,col="forestgreen")
 
 #PERMANOVA analysis-Whats driving variation we see above?
