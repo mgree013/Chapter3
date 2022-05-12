@@ -31,7 +31,7 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 ![](Newfigs/fig7.png)
 
 ### Fig 4:  Ordination of zooplankton and macroinvertebrate species from Sierra Nevada, CA as a function  of  fish and elevation
-![](Newfigs/fig7.png)
+![](Newfigs/Fig4.png)
 
 ### Fig 5: CWM of zooplankton and macroinvertebrate community biomass
 ![](Newfigs/fig7.png)
