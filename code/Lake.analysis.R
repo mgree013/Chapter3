@@ -127,6 +127,7 @@ env_div<-left_join(env,local_diversity, by=c("lake_id", "survey_date"))%>%filter
   filter(lake_elevation_nbr>=2800,lake_elevation_nbr<=3600 )
 
 env_div%>%
+  filter(lake_elevation_nbr>2500, lake_elevation_nbr<3602)%>%
   gather(N0,  N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=var))+
   geom_point()+
@@ -138,6 +139,7 @@ env_div%>%
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
 env_div%>%
+  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=actual_fish_presence))+
   geom_point()+
@@ -242,6 +244,7 @@ mod<-betareg(betas.LCBD~actual_fish_presence,env_div)
 summary(mod)
 
 env_div%>%
+  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   gather( N1, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=actual_fish_presence, y=value, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
@@ -475,10 +478,10 @@ cwm=tres_bm$CWM
 cwm<-cwm%>%
   rownames_to_column("id_date")%>%
   separate("id_date",sep="_" ,into=c("lake_id", "survey_date"))%>%
-  dplyr::rename(CWM=Body_mass_ug) #Body_mass_ug or mean_body_size
+  dplyr::rename(CWM=mean_body_size) #Body_mass_ug or mean_body_size
 
 cwm$lake_id<-as.integer(cwm$lake_id)
-env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%filter(CWM < 4000)
+env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%filter(lake_elevation_nbr>2750,lake_elevation_nbr<3500)
 
 
 #########################################################################
@@ -493,20 +496,26 @@ env_cwm%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 fig5a<-env_cwm%>%
-  ggplot(aes(x=actual_fish_presence,y=CWM, fill=actual_fish_presence))+
+  #filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
+  ggplot(aes(x=actual_fish_presence,y=CWM*.01, fill=actual_fish_presence))+
   geom_boxplot()+
-  xlab("Fish Presence")+
+  xlab("Fish Presence")+ylab("CWM")+
   ggtitle("a)") +
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
 
-dog<-glm(CWM~actual_fish_presence*lake_elevation_nbr,family=gaussian(link="identity"),env_cwm)
+dog<-aov(CWM~actual_fish_presence,env_cwm)
 summary(dog)
 r2(dog)
 
+env_cwm%>%
+  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
+  count(actual_fish_presence)
+
 fig6a<-env_cwm%>%
+  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   ggplot(aes(x=lake_elevation_nbr,y=CWM,colour=actual_fish_presence))+
   geom_point()+
   geom_smooth(method = "lm")+

@@ -11,7 +11,7 @@
 Packages <- c("tidyverse", "ggplot2", "vegan", "reshape2","reshape", "betareg","adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
 lapply(Packages, library, character.only = TRUE)
 
-setwd("~/Dropbox/Manuscipts/L-S Food web/Food-Web-Structure-Sierra/data")
+setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
 
 ###########################################
 #Load Data
@@ -114,7 +114,7 @@ fig1b<-species_mass_data_env_filter%>%
   ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = mean),y=log(abundance+1),fill=as.factor(Fish)))+
   geom_boxplot()+
   ggtitle("b)") +
-  xlab("Macroinvetebrate Taxa")+ylab("Macroinvetebrate Log Density + 1")+
+  xlab("Macroinvertebrate Taxa")+ylab("Macroinvertebrate Log Density + 1")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
@@ -216,41 +216,41 @@ species<-species%>%dplyr::select(-c(Chironomidae,Acari,Nematomorpha,Oligochaeta,
 diversity<-species%>%
   transmute(N0=rowSums(species > 0),H= diversity(species),N1 =exp(H),N2 =diversity(species, "inv"),J= H/log(N0),E10= (N1/N0),E20= (N2/N0),Com.Size=log(rowSums(species)+1),betas.LCBD=beta.div(species, method="hellinger",sqrt.D=TRUE)$LCBD  )
 #Calculate Beta Diversity (LCBD) for each network
-combine<-cbind(species,env$O.NET)
+#combine<-cbind(species,env$O.NET)
 
-kern<-subset(combine, `env$O.NET`=="KERN")
-kern.var<-kern[, colSums(kern != 0) > 0]
-kern.beta<-beta.div(kern.var[1:61], method="hellinger",sqrt.D=TRUE)
-kern.beta.comp<-beta.div.comp(kern.var[1:61], coef = "S", quant=T)
+#kern<-subset(combine, `env$O.NET`=="KERN")
+#kern.var<-kern[, colSums(kern != 0) > 0]
+#kern.beta<-beta.div(kern.var[1:61], method="hellinger",sqrt.D=TRUE)
+#kern.beta.comp<-beta.div.comp(kern.var[1:61], coef = "S", quant=T)
 
-casc<-subset(combine, `env$O.NET`=="CASCADE")
-casc.var<-casc[, colSums(casc != 0) > 0]
-casc.beta<-beta.div(casc.var[1:44], method="hellinger",sqrt.D=TRUE)
-casc.beta.comp<-beta.div.comp(casc.var[1:44], coef = "S", quant=T)
+#casc<-subset(combine, `env$O.NET`=="CASCADE")
+#casc.var<-casc[, colSums(casc != 0) > 0]
+#casc.beta<-beta.div(casc.var[1:44], method="hellinger",sqrt.D=TRUE)
+#casc.beta.comp<-beta.div.comp(casc.var[1:44], coef = "S", quant=T)
 
-evo<-subset(combine, `env$O.NET`=="EVO")
-evo.var<-evo[, colSums(evo != 0) > 0]
-evo.beta<-beta.div(evo.var[1:36], method="hellinger",sqrt.D=TRUE)
-evo.beta.comp<-beta.div.comp(evo.var[1:36], coef = "S", quant=T)
+#evo<-subset(combine, `env$O.NET`=="EVO")
+#evo.var<-evo[, colSums(evo != 0) > 0]
+#evo.beta<-beta.div(evo.var[1:36], method="hellinger",sqrt.D=TRUE)
+#evo.beta.comp<-beta.div.comp(evo.var[1:36], coef = "S", quant=T)
 
-bubb<-subset(combine, `env$O.NET`=="BUBBS")
-bubb.var<-bubb[, colSums(bubb != 0) > 0]
-bubb.beta<-beta.div(bubb.var[1:83], method="hellinger",nperm=999,sqrt.D=TRUE)
-bubb.beta.comp<-beta.div.comp(bubb.var[1:83], coef = "S", quant=T)
+#bubb<-subset(combine, `env$O.NET`=="BUBBS")
+#bubb.var<-bubb[, colSums(bubb != 0) > 0]
+#bubb.beta<-beta.div(bubb.var[1:83], method="hellinger",nperm=999,sqrt.D=TRUE)
+#bubb.beta.comp<-beta.div.comp(bubb.var[1:83], coef = "S", quant=T)
 
-young<-subset(combine, `env$O.NET`=="YOUNG")
-young.var<-young[, colSums(young != 0) > 0]
-young.beta<-beta.div(young.var[1:29], nperm=999,method="hellinger",sqrt.D=TRUE)
-young.beta.comp<-beta.div.comp(young.var[1:29], coef = "S", quant=T)
+#young<-subset(combine, `env$O.NET`=="YOUNG")
+#young.var<-young[, colSums(young != 0) > 0]
+#young.beta<-beta.div(young.var[1:29], nperm=999,method="hellinger",sqrt.D=TRUE)
+#young.beta.comp<-beta.div.comp(young.var[1:29], coef = "S", quant=T)
 
-rock<-subset(combine, `env$O.NET`=="ROCK")
-rock.var<-rock[, colSums(rock != 0) > 0]
-rock.beta<-beta.div(rock.var[1:60], nperm=999,method="hellinger",sqrt.D=TRUE)
-rock.beta.comp<-beta.div.comp(rock.var[1:60], coef = "S", quant=T)
+#rock<-subset(combine, `env$O.NET`=="ROCK")
+#rock.var<-rock[, colSums(rock != 0) > 0]
+#rock.beta<-beta.div(rock.var[1:60], nperm=999,method="hellinger",sqrt.D=TRUE)
+#ock.beta.comp<-beta.div.comp(rock.var[1:60], coef = "S", quant=T)
 
-betas.LCBD<-c(kern.beta$LCBD,casc.beta$LCBD,evo.beta$LCBD,bubb.beta$LCBD,young.beta$LCBD,rock.beta$LCBD)
-betas.LCBD<-as.data.frame(betas.LCBD)
-betas.LCBD.data<-betas.LCBD%>%rownames_to_column("Site")
+#betas.LCBD<-c(kern.beta$LCBD,casc.beta$LCBD,evo.beta$LCBD,bubb.beta$LCBD,young.beta$LCBD,rock.beta$LCBD)
+#betas.LCBD<-as.data.frame(betas.LCBD)
+#betas.LCBD.data<-betas.LCBD%>%rownames_to_column("Site")
 diversity.data<-diversity%>%rownames_to_column("Site")
 
 #all<-diversity.data%>%left_join(env,by="Site")%>%left_join(betas.LCBD.data,by="Site")#%>%filter(Elevation >2790)
@@ -268,7 +268,7 @@ diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"	Outlet.Vidette.below.20012")%>%filter(Elevation >2800)
 
 diversity.env%>%
-  filter(Elevation >2800)%>%
+  filter(Elevation >3000)%>%
   gather(  N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=var))+
   geom_point()+
@@ -332,7 +332,7 @@ reported.table2
 r2(mod2)
 
 diversity.env%>%
-  filter(Elevation >2790)%>%
+  filter(Elevation >3000)%>%
   gather(N1, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=as.factor(Fish), y=value, fill=as.factor(Fish)))+
   geom_boxplot()+
@@ -478,9 +478,11 @@ boxplot(mod)
 species.traits<-read.csv(file = "sp.density.update.12.28.19_traits.csv", row.names = 1)
 tr.traits<-read.csv("Full_full_fn_trait.csv")
 
+species.traits<-species.traits%>%dplyr::select(-c(Chironomidae))
 
-row.traits<-tr.traits%>%filter(Taxon !="Benthic.producers" & Taxon !="Pelagic.producers")
-traitsy<-tr.traits%>%dplyr::rename(Body_mass_mg=M)%>%filter(Taxon !="Benthic.producers" & Taxon !="Pelagic.producers")%>%dplyr::select(c(Body_mass_mg))
+
+row.traits<-tr.traits%>%filter(Taxon !="Benthic.producers" , Taxon !="Pelagic.producers", Taxon !="Chironomidae")
+traitsy<-tr.traits%>%dplyr::rename(Body_mass_mg=M)%>%filter(Taxon !="Benthic.producers" , Taxon !="Pelagic.producers", Taxon !="Chironomidae")%>%dplyr::select(c(Body_mass_mg))
 str(traitsy)
 #rownames(traitsy)<-rownames(row.traits)
 rownames(traitsy)<-row.traits$Taxonomic_name
@@ -489,19 +491,19 @@ tres_bm = dbFD(traitsy,species.traits, corr = ("lingoes"),
                stand.FRic = TRUE, calc.FDiv = TRUE)
 
 cwm=tres_bm$CWM
-FDis=as.data.frame(tres_bm$FDis)
-FEve=as.data.frame(tres_bm$FEve)
-FRic=as.data.frame(tres_bm$FRic)
-
 head(cwm)
+cwm<-cwm%>%rownames_to_column("Site")
+datas<-left_join(env,cwm, by="Site")
 
-datas<-cbind(env,cwm,FRic,FDis,FEve)
 datasz<-datas%>%
   filter(River.dist.lake>0.1)%>%
+  filter(O.NET != "YOUNG")%>%
+  filter(Elevation >3100 ,Elevation <3500 )
+  #filter(Elevation >3150 ,Elevation <3500 )
   #filter(Head.river.dist>2.3)%>%
   #filter(Fish != "NA")%>%
-  filter(O.NET != "YOUNG")%>%
-  filter(Body_mass_mg<15)
+  #filter(O.NET != "CASCADE",O.NET != "YOUNG")%>%
+  #filter(Body_mass_mg<15)
 
 datasz%>%
   filter(Elevation>2790)%>%
@@ -515,7 +517,7 @@ datasz%>%
 
 fig6b<-datasz%>%
   filter(Fish !="NA")%>%
-  filter(Elevation>2790)%>%
+  #filter(Elevation>2790)%>%
   ggplot(aes(x = Elevation, y = Body_mass_mg, colour=as.factor(Fish)))+ #, colour=as.factor(Fish))) + #remove , fill=Network and see what the grpah looks like, are there tredns that both entowrks share together
   geom_point()+
   #geom_smooth(method = "lm")+
@@ -539,7 +541,8 @@ datasz%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 fig5b<-datasz%>%
-  filter(Fish != "NA")%>%
+  #filter(Fish != "NA")%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   ggplot(aes(x = as.factor(Fish), y = Body_mass_mg, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("no", "yes"))+
@@ -551,7 +554,23 @@ fig5b<-datasz%>%
         panel.border = element_blank(),panel.background = element_blank())+
   theme(legend.position = c(0.75, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
+datasz%>%
+  filter(Fish != "NA")%>%
+  ggplot(aes(x = as.factor(Fish), y = Body_mass_mg, fill=as.factor(Fish)))+ 
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("no", "yes"))+
+  xlab("Fish Presence")+ylab("CWM")+
+  labs(fill='Fish Presence') +
+  ggtitle("b)") +
+  facet_grid(~O.NET)+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.75, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
+dog<-aov(Body_mass_mg~Fish,datasz)
+summary(dog)
+r2(dog)
 #########################################################################
 #Visualize influence of fish and elevation
 
@@ -560,6 +579,7 @@ fig5b<-datasz%>%
 
 #Fish  By Elevation
 stream.elev.fish<-diversity.env%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   ggplot(aes(x = as.factor(Fish), y = Elevation, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -572,5 +592,11 @@ stream.elev.fish<-diversity.env%>%
   theme(legend.position = c(0.25, 0.15),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 
+stream.elev<-diversity.env%>%
+  filter(Elevation >3150 ,Elevation <3500 )%>%
+  count(Fish)
+
+dog<-aov(Elevation~Fish,stream.elev)
+summary(dog)
 ############################################################################################################################################
 
