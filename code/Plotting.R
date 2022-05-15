@@ -24,7 +24,7 @@ set.seed(99)
 species<-sp_abund_env[,3:39]
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
-dune.nmds=metaMDS(dune.rel, k=2, try=10) #NMDS code
+dune.nmds=metaMDS(dune.rel, k=2, try=100) #NMDS code
 dune.nmds
 #stressplot(dune.nmds)
 
@@ -41,8 +41,12 @@ adj=-0.05
 mtext("a)", side=side, line=line, cex=cex, adj=adj)
 
 #stream
+env_elevation<-envs%>%filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(c(Elevation,Site))
+species_env<-species_env%>%filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(c(Elevation,Site,Fish))
+
 set.seed(99)
-species<-species_2
+species<-species_2%>%rownames_to_column("Site")%>%left_join(env_elevation, by="Site")%>%
+  filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
 dune.nmds=metaMDS(dune.rel, k=2, try=1000) #NMDS code
@@ -58,6 +62,7 @@ cex = 1
 side = 3
 adj=-0.05
 mtext("b)", side=side, line=line, cex=cex, adj=adj)
+
 
 
 dev.off()

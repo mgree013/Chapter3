@@ -22,13 +22,13 @@ summary(species)
 traits<-read.csv("Full_full_fn_trait.csv")
 summary(traits)
 
-env <-read.csv("dave.matt.env.full.12.29.19.csv")
-summary(env)
+envs <-read.csv("dave.matt.env.full.12.29.19.csv")
+summary(envs)
 
 ###########################################
 #organize data
-env<-env%>%mutate(Euc.dist.lake=log(Euc.dist.lake+1),River.dist.lake=log(River.dist.lake+1),Head.river.dist=log(Head.river.dist+1))
-envs<-env%>%dplyr::select(c(Site,O.NET))
+envs<-envs%>%mutate(Euc.dist.lake=log(Euc.dist.lake+1),River.dist.lake=log(River.dist.lake+1),Head.river.dist=log(Head.river.dist+1))
+envs<-envs%>%dplyr::select(c(Site,O.NET))
 species_all<-species%>%pivot_longer(-Site, names_to="Taxon", values_to="abundance")%>%filter(abundance>0)
 traits_mass<-traits%>%dplyr::rename(Body_mass_mg=M)%>%dplyr::select(c(Taxon, Body_mass_mg))
 species_mass_data<-left_join(species_all,traits_mass, by="Taxon")
@@ -254,7 +254,7 @@ diversity<-species%>%
 diversity.data<-diversity%>%rownames_to_column("Site")
 
 #all<-diversity.data%>%left_join(env,by="Site")%>%left_join(betas.LCBD.data,by="Site")#%>%filter(Elevation >2790)
-all<-diversity.data%>%left_join(env,by="Site")%>%filter(Elevation >2790)
+all<-diversity.data%>%left_join(envs,by="Site")%>%filter(Elevation >2790)
 diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"Outlet.11007.fishless.2003")%>%
   filter(Site !=	"Outlet.11007.fishless.2004")%>%
@@ -268,7 +268,7 @@ diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"	Outlet.Vidette.below.20012")%>%filter(Elevation >2800)
 
 diversity.env%>%
-  filter(Elevation >3000)%>%
+  #filter(Elevation >3100 ,Elevation <3500 )%>%
   gather(  N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=var))+
   geom_point()+
@@ -332,7 +332,7 @@ reported.table2
 r2(mod2)
 
 diversity.env%>%
-  filter(Elevation >3000)%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   gather(N1, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=as.factor(Fish), y=value, fill=as.factor(Fish)))+
   geom_boxplot()+
@@ -379,7 +379,7 @@ fig2f<-diversity.env%>%
 
 
 diversity.env%>%
-  filter(Elevation >2790)%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=as.factor(Fish)))+
   geom_point()+
@@ -391,6 +391,7 @@ diversity.env%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 diversity.env%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=as.factor(Fish)))+
   geom_point()+
@@ -420,6 +421,7 @@ mod<-betareg(betas.LCBD~Fish,diversity.env)
 summary(mod)
 
 diversity.env%>%
+  filter(Elevation >3100 ,Elevation <3500 )%>%
   gather( N1, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=as.factor(Fish), y=value, fill=as.factor(Fish)))+
   geom_boxplot()+
@@ -431,7 +433,7 @@ diversity.env%>%
 
 ############################################################################################################################################
 #NMDS
-species_env<-species%>%rownames_to_column("Site")%>%left_join(env, by="Site")%>%filter(Fish!="NA")
+species_env<-species%>%rownames_to_column("Site")%>%left_join(envs, by="Site")%>%filter(Fish!="NA")
 species_2<-species_env%>%column_to_rownames("Site")%>%dplyr::select(c(Acentrella:Zapada))
 
 set.seed(99)
@@ -493,7 +495,7 @@ tres_bm = dbFD(traitsy,species.traits, corr = ("lingoes"),
 cwm=tres_bm$CWM
 head(cwm)
 cwm<-cwm%>%rownames_to_column("Site")
-datas<-left_join(env,cwm, by="Site")
+datas<-left_join(envs,cwm, by="Site")
 
 datasz<-datas%>%
   filter(River.dist.lake>0.1)%>%

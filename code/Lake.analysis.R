@@ -378,7 +378,6 @@ env_abundz_filter<-env_abundzzz%>%
   mutate(change_density=No-Yes, change_1_density=Yes-No)
 
 env_abundz_filter%>%
-  filter(change_density>0)%>%
   ggplot(aes(x=log(Mean_body_size_mm+1),y=log(change_density+1)))+
   geom_point()+
   geom_smooth(method = "lm")+
@@ -392,6 +391,16 @@ env_abundz_filter%>%
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+env_abundz_filter_plot<-env_abundz_filter%>%pivot_longer(No:Yes, "actual_fish_presence")
+env_abundz_filter_plot%>%
+  filter()%>%
+  ggplot(aes(x=reorder(Taxon, Mean_body_size_mm, FUN = median),y=change_1_density))+
+  geom_boxplot()+
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Mean Change Zooplankton Density")+xlab("Zooplankton Species")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
