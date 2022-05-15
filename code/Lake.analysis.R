@@ -371,23 +371,29 @@ env_abundzzz%>%
 
 ##########
 #Just Select Species that occur in fish and fishless sites
+av_zoop_body_size_newer<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
+
 env_abundz_filter<-env_abundzzz%>%
-  group_by(Taxon,actual_fish_presence,Mean_body_size_mm)%>%
-  summarise(Mean_density=mean(zoop_density))%>%
+  left_join(av_zoop_body_size_newer, by="Taxon")%>%
+  group_by(Taxon,actual_fish_presence,Body_mass_ug)%>%
+  summarise(Mean_density=mean(log(zoop_density+1)))%>%
   pivot_wider(names_from=actual_fish_presence,values_from =Mean_density )%>%
   mutate(change_density=No-Yes, change_1_density=Yes-No)
 
 env_abundz_filter%>%
-  ggplot(aes(x=log(Mean_body_size_mm+1),y=log(change_density+1)))+
+  ggplot(aes(x=log(Body_mass_ug+1),y=change_density))+
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
+
+dog<-lm(change_density~log(Body_mass_ug+1),env_abundz_filter)
+summary(dog)
 
 env_abundz_filter%>%
   filter(change_1_density>0)%>%
-  ggplot(aes(x=log(Mean_body_size_mm+1),y=log(change_1_density+1)))+
+  ggplot(aes(x=log(Body_mass_ug+1),y=change_1_density))+
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
@@ -396,8 +402,9 @@ env_abundz_filter%>%
 env_abundz_filter_plot<-env_abundz_filter%>%pivot_longer(No:Yes, "actual_fish_presence")
 env_abundz_filter_plot%>%
   filter()%>%
-  ggplot(aes(x=reorder(Taxon, Mean_body_size_mm, FUN = median),y=change_1_density))+
+  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=change_1_density))+
   geom_boxplot()+
+  geom_hline(yintercept=0, linetype='dotted', col = 'black')+
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   ylab("Mean Change Zooplankton Density")+xlab("Zooplankton Species")+
@@ -465,7 +472,7 @@ av_zoop_body_size_new<-dt11%>%
   remove_rownames()%>%
   column_to_rownames('Species_Name')
 
-av_zoop_body_size_new<-read.csv("data/length_mass_regress_zoop.csv",row.names = 1)
+av_zoop_body_size_new<-read.csv("length_mass_regress_zoop.csv",row.names = 1)
 av_zoop_body_size_new<-av_zoop_body_size_new%>%dplyr::select(-c(Mean_body_size_mm))
 
 pivot_clean_zoopzz<-clean_zoopzz%>%pivot_wider(names_from = "Species_Name",values_from="zoop_density")%>%
