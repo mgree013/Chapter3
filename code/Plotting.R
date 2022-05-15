@@ -46,7 +46,7 @@ species_env<-species_env%>%filter(Elevation >3100 ,Elevation <3500)%>%dplyr::sel
 
 set.seed(99)
 species<-species_2%>%rownames_to_column("Site")%>%left_join(env_elevation, by="Site")%>%
-  filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")
+  filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")#%>%dplyr::select(-c(Chironomidae,Nematomorpha,Oligochaeta,Ostracoda,Turbellaria,Euhirudinea))
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
 dune.nmds=metaMDS(dune.rel, k=2, try=1000) #NMDS code

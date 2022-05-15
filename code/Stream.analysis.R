@@ -16,7 +16,7 @@ setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
 ###########################################
 #Load Data
 #species<-read.csv(file = "sp.density.update.12.28.19.csv")
-species<-read.csv(file = "sp.density.update.12.28.19_traits.csv")
+species<-read.csv(file = "sp.density.update.12.28.19_traits.csv",row.names = 1)
 summary(species)
 
 traits<-read.csv("Full_full_fn_trait.csv")
@@ -436,7 +436,7 @@ diversity.env%>%
 species_env<-species%>%rownames_to_column("Site")%>%left_join(envs, by="Site")%>%filter(Fish!="NA")
 species_2<-species_env%>%column_to_rownames("Site")%>%dplyr::select(c(Acentrella:Zapada))
 
-set.seed(99)
+sset.seed(99)
 species<-species_2
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
