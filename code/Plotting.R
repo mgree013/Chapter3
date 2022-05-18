@@ -84,3 +84,6 @@ plot_grid(fig6a,fig6b,nrow=1)
 ###########################################################################
 #Supplemental Figure S1
 plot_grid(lake.elev.fish,stream.elev.fish, nrow=1)
+
+plot_grid(supp.a,supp.b,supp.c,supp.d, nrow=2)
+

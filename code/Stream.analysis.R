@@ -184,15 +184,15 @@ pseudoR0
 species_mass_data_env$Fish<-as.factor(species_mass_data_env$Fish)
 species_mass_data_env_sum<-species_mass_data_env%>%
   group_by(Taxon,Fish, Body_mass_mg)%>%
-  summarise(Mean_density=mean(abundance))%>%
+  summarise(Mean_density=mean(log(abundance+1)))%>%
   filter(Fish !="NA")%>%
   pivot_wider(names_from = Fish,values_from = Mean_density)%>%
-  mutate(change_density=No-Yes, change_1_density=Yes-No)
+  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))
 
 
 species_mass_data_env_sum%>%
   filter(change_density>0)%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=log(change_density+1)))+
+  ggplot(aes(x=log(Body_mass_mg+1),y=abs.change))+
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Change Macro Density")+xlab("Maco Body Size")+
@@ -201,10 +201,22 @@ species_mass_data_env_sum%>%
 
 species_mass_data_env_sum%>%
   filter(change_1_density>0)%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=log(change_1_density+1)))+
+  ggplot(aes(x=log(Body_mass_mg+1),y=change_1_density))+
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Change Macro Density")+xlab("Maco Body Size")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
+
+species_mass_data_env_sum%>%
+  filter(relative_change != "NA")%>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = median),y=relative_change))+
+  geom_boxplot()+
+  geom_hline(yintercept=1, linetype='dotted', col = 'black')+
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Species")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
@@ -580,25 +592,54 @@ r2(dog)
 ############################################################################################################################################
 
 #Fish  By Elevation
-stream.elev.fish<-diversity.env%>%
-  filter(Elevation >3100 ,Elevation <3500 )%>%
+supp.c<-stream.elev%>%
+  filter(Elevation >3200)%>%#,Elevation <3700 )%>%
   ggplot(aes(x = as.factor(Fish), y = Elevation, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+
-  ggtitle("b)") +
+  ggtitle("c)") +
   ylab("Elevation (m)")+
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+
-  theme(legend.position = c(0.25, 0.15),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
-
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+ theme(legend.position = "none")
 
 stream.elev<-diversity.env%>%
-  filter(Elevation >3150 ,Elevation <3500 )%>%
-  count(Fish)
+  filter(Elevation >3200)#,Elevation <3700 )
+
 
 dog<-aov(Elevation~Fish,stream.elev)
 summary(dog)
+
+
+supp.d<-stream.elev%>%
+  ggplot(aes(x = as.factor(Fish), fill=as.factor(Fish)))+ 
+  geom_bar(stat="count")+
+  stat_count(geom = "text", colour = "black", size = 3.5,
+             aes(label = ..count..),position=position_dodge(width=0.9), vjust=-0.25)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+
+  ggtitle("d)") +
+  ylab("Number of Stream Sites")+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+ theme(legend.position = "none")
+
+
+diversity.env%>%
+  filter(Elevation >3100 ,Elevation <3525 )%>%
+  ggplot(aes(x = as.factor(Fish), fill=as.factor(Fish)))+ 
+  geom_bar(stat="count")+
+  stat_count(geom = "text", colour = "black", size = 3.5,
+             aes(label = ..count..),position=position_dodge(width=0.9), vjust=-0.25)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+
+  ggtitle("b)") +
+  ylab("Number of Stream Sites")+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+
+  theme(legend.position = c(0.25, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
 ############################################################################################################################################
 

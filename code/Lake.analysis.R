@@ -123,8 +123,31 @@ mapview(snw_sf, zcol="actual_fish_presence", layer.name="Fish Presence")
 
 env_div<-left_join(env,local_diversity, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%
   mutate(Com.Size=log(Com.Size+1))%>%
-  filter(HA>=0.5)%>%
-  filter(lake_elevation_nbr>=2800,lake_elevation_nbr<=3600 )
+  filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
+
+supp.b<-env_div%>%
+ ggplot(aes(x=actual_fish_presence, fill=actual_fish_presence))+
+  geom_bar(stat="count")+
+  stat_count(geom = "text", colour = "black", size = 3.5,
+             aes(label = ..count..),position=position_dodge(width=0.9), vjust=-0.25)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+
+  ggtitle("b)") +
+  ylab("Number of Lakes")+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+  
+supp.a<-env_div%>%
+  ggplot(aes(x = actual_fish_presence, y = lake_elevation_nbr, fill=actual_fish_presence))+ 
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+
+  ggtitle("a)") +
+  ylab("Elevation (m)")+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 env_div%>%
   filter(lake_elevation_nbr>2500, lake_elevation_nbr<3602)%>%
@@ -348,7 +371,8 @@ env_abundz<-clean_zoopzz%>%
   left_join(env, by=c("lake_id", "survey_date"))
 
 av_zoop_body_size_news<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
-env_abundzzz<-env_abund%>%dplyr::rename(Taxon=Species_Name)%>%left_join(av_zoop_body_size_news, by="Taxon")%>%dplyr::rename(Mean_body_size_mm=mean_body_size)
+env_abundzzz<-env_abund%>%dplyr::rename(Taxon=Species_Name)%>%left_join(av_zoop_body_size_news, by="Taxon")%>%
+  dplyr::rename(Mean_body_size_mm=Body_mass_ug)%>%filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 env_abundzzz%>%
   filter()%>%
@@ -378,7 +402,7 @@ env_abundz_filter<-env_abundzzz%>%
   group_by(Taxon,actual_fish_presence,Body_mass_ug)%>%
   summarise(Mean_density=mean(log(zoop_density+1)))%>%
   pivot_wider(names_from=actual_fish_presence,values_from =Mean_density )%>%
-  mutate(change_density=No-Yes, change_1_density=Yes-No)
+  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))
 
 env_abundz_filter%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=change_density))+
@@ -401,13 +425,13 @@ env_abundz_filter%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 env_abundz_filter_plot<-env_abundz_filter%>%pivot_longer(No:Yes, "actual_fish_presence")
 env_abundz_filter_plot%>%
-  filter()%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=change_1_density))+
+  filter(relative_change != "NA")%>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=relative_change))+
   geom_boxplot()+
-  geom_hline(yintercept=0, linetype='dotted', col = 'black')+
+  geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  ylab("Mean Change Zooplankton Density")+xlab("Zooplankton Species")+
+  ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Species")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
