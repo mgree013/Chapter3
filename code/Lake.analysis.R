@@ -133,7 +133,7 @@ supp.b<-env_div%>%
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+
   ggtitle("b)") +
-  ylab("Number of Lakes")+
+  ylab("Number of Lake Sites")+
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
@@ -370,7 +370,7 @@ env_abundz<-clean_zoopzz%>%
 
 av_zoop_body_size_news<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
 env_abundzzz<-env_abund%>%dplyr::rename(Taxon=Species_Name)%>%left_join(av_zoop_body_size_news, by="Taxon")%>%
-  dplyr::rename(Mean_body_size_mm=Body_mass_ug)%>%filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
+  dplyr::rename(Mean_body_size_mm=Body_mass_ug)%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 env_abundzzz%>%
   filter()%>%
@@ -550,7 +550,7 @@ summary(dog)
 r2(dog)
 
 env_cwm%>%
-  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
+  filter(lake_elevation_nbr>1800, lake_elevation_nbr<3500)%>%
   count(actual_fish_presence)
 
 fig6a<-env_cwm%>%

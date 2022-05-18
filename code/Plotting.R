@@ -20,7 +20,7 @@ plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f, nrow=2)
 par(mfrow=c(1,2))    # set the plotting area into a 1*2 array
 
 
-sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%
+sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
   filter(HA>=0.5)%>%filter(lake_max_depth>3)
 #lake
 set.seed(99)
@@ -58,6 +58,7 @@ dune.nmds
 
 plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
 points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
+#ordilabel(dune.nmds, dis="sites", cex=1.2, font=3, fill="hotpink", col="blue")
 ordihull(dune.nmds, species_env$Fish, display="sites", label=F,lwd=2, col=c("#440154FF","#FDE725FF"))
 ordisurf(dune.nmds, species_env$Elevation, prioirty=,labcex=0.9, add = T,col="forestgreen")
 line = 1
