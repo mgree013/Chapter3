@@ -317,7 +317,7 @@ fig3f<-diversity.env%>%  ggplot(aes(x=Elevation, y=betas.LCBD))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
-lm<-lm(betas.LCBD~Elevation,diversity.env)
+slm<-lm(betas.LCBD~Elevation,diversity.env)
 summary(lm)
 
 mod<-betareg(betas.LCBD~Elevation,diversity.env)
@@ -565,7 +565,7 @@ fig5b<-datasz%>%
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
-  theme(legend.position = c(0.75, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+  theme(legend.position = c(0.5, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 datasz%>%
   filter(Fish != "NA")%>%
@@ -579,7 +579,7 @@ datasz%>%
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
-  theme(legend.position = c(0.75, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+  theme(legend.position = c(0.45, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 dog<-aov(Body_mass_mg~Fish,datasz)
 summary(dog)
