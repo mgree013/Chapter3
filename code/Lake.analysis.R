@@ -123,7 +123,7 @@ mapview(snw_sf, zcol="actual_fish_presence", layer.name="Fish Presence")
 
 env_div<-left_join(env,local_diversity, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%
   mutate(Com.Size=log(Com.Size+1))%>%
-  filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
+  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 supp.b<-env_div%>%
  ggplot(aes(x=actual_fish_presence, fill=actual_fish_presence))+
@@ -150,7 +150,6 @@ supp.a<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 env_div%>%
-  filter(lake_elevation_nbr>2500, lake_elevation_nbr<3602)%>%
   gather(N0,  N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=var))+
   geom_point()+
@@ -162,7 +161,6 @@ env_div%>%
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
 env_div%>%
-  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=actual_fish_presence))+
   geom_point()+
@@ -188,7 +186,7 @@ env_div%>%
 fig3a<-env_div%>%
   ggplot(aes(x=lake_elevation_nbr, y=N1))+
   geom_point()+
-  geom_smooth(method = "lm",se=F)+
+  geom_smooth(method = "lm",se=T)+
   scale_color_viridis_d()+
   ggtitle("a)") +
   xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
@@ -198,7 +196,7 @@ fig3a<-env_div%>%
 fig3b<-env_div%>%
   ggplot(aes(x=lake_elevation_nbr, y=Com.Size))+
   geom_point()+
-  geom_smooth(method = "lm",se=F)+
+  geom_smooth(method = "lm",se=T)+
   scale_color_viridis_d()+
   ggtitle("b)") +
   xlab("Elevation (m)")+ylab("Community Size")+
@@ -208,7 +206,7 @@ fig3b<-env_div%>%
 fig3c<-env_div%>%
   ggplot(aes(x=lake_elevation_nbr, y=betas.LCBD))+
   geom_point()+
-  geom_smooth(method = "lm",se=F)+
+  geom_smooth(method = "lm",se=T)+
   scale_color_viridis_d()+
   ggtitle("c)") +
   xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
@@ -518,10 +516,11 @@ cwm=tres_bm$CWM
 cwm<-cwm%>%
   rownames_to_column("id_date")%>%
   separate("id_date",sep="_" ,into=c("lake_id", "survey_date"))%>%
-  dplyr::rename(CWM=mean_body_size) #Body_mass_ug or mean_body_size
+  dplyr::rename(CWM=Body_mass_ug) #Body_mass_ug or mean_body_size
 
 cwm$lake_id<-as.integer(cwm$lake_id)
-env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%filter(lake_elevation_nbr>2750,lake_elevation_nbr<3500)
+env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%
+  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 
 #########################################################################
@@ -555,7 +554,6 @@ env_cwm%>%
   count(actual_fish_presence)
 
 fig6a<-env_cwm%>%
-  filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   ggplot(aes(x=lake_elevation_nbr,y=CWM,colour=actual_fish_presence))+
   geom_point()+
   geom_smooth(method = "lm")+

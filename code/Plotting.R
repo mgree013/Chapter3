@@ -19,20 +19,23 @@ plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f, nrow=2)
 # Figure 4
 par(mfrow=c(1,2))    # set the plotting area into a 1*2 array
 
+
+sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >2800, lake_elevation_nbr <3500)%>%
+  filter(HA>=0.5)%>%filter(lake_max_depth>3)
 #lake
 set.seed(99)
-species<-sp_abund_env[,3:39]
+species<-sp_abund_env_filter[,3:39]
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
-dune.nmds=metaMDS(dune.rel, k=2, try=100) #NMDS code
+dune.nmds=metaMDS(dune.rel, k=2, try=1000) #NMDS code
 dune.nmds
 #stressplot(dune.nmds)
 
 plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
 #text(dune.nmds$species[,1], dune.nmds$species[,2], rownames(dune.nmds$species), cex=0.7, col ="black")
 points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
-ordihull(dune.nmds, sp_abund_env$actual_fish_presence, display="sites", label=F,lwd=2, col=c("#440154FF","#FDE725FF"))
-ordisurf(dune.nmds, sp_abund_env$lake_elevation_nbr, prioirty=,labcex=0.9, add = T,col="forestgreen")
+ordihull(dune.nmds, sp_abund_env_filter$actual_fish_presence, display="sites", label=F,lwd=2, col=c("#440154FF","#FDE725FF"))
+ordisurf(dune.nmds, sp_abund_env_filter$lake_elevation_nbr, prioirty=,labcex=0.9, add = T,col="forestgreen")
 
 line = 1
 cex = 1
@@ -41,12 +44,12 @@ adj=-0.05
 mtext("a)", side=side, line=line, cex=cex, adj=adj)
 
 #stream
-env_elevation<-envs%>%filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(c(Elevation,Site))
-species_env<-species_env%>%filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(c(Elevation,Site,Fish))
+env_elevation<-envs%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site))
+species_env<-species_env%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site,Fish))
 
 set.seed(99)
 species<-species_2%>%rownames_to_column("Site")%>%left_join(env_elevation, by="Site")%>%
-  filter(Elevation >3100 ,Elevation <3500)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")#%>%dplyr::select(-c(Chironomidae,Nematomorpha,Oligochaeta,Ostracoda,Turbellaria,Euhirudinea))
+  filter(Elevation >3200)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")#%>%dplyr::select(-c(Chironomidae,Nematomorpha,Oligochaeta,Ostracoda,Turbellaria,Euhirudinea))
 dune.rel<-decostand(species,"total") #standardize community data
 dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
 dune.nmds=metaMDS(dune.rel, k=2, try=1000) #NMDS code

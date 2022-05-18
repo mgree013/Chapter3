@@ -266,7 +266,7 @@ diversity<-species%>%
 diversity.data<-diversity%>%rownames_to_column("Site")
 
 #all<-diversity.data%>%left_join(env,by="Site")%>%left_join(betas.LCBD.data,by="Site")#%>%filter(Elevation >2790)
-all<-diversity.data%>%left_join(envs,by="Site")%>%filter(Elevation >2790)
+all<-diversity.data%>%left_join(envs,by="Site")%>%  filter(Elevation >3200)
 diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"Outlet.11007.fishless.2003")%>%
   filter(Site !=	"Outlet.11007.fishless.2004")%>%
@@ -277,7 +277,7 @@ diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"Outlet.10494.trt.2012")%>%
   filter(Site !=	"	Outlet.Vidette.below.2003")%>%
   filter(Site !=	"	Outlet.Vidette.below.2004")%>%
-  filter(Site !=	"	Outlet.Vidette.below.20012")%>%filter(Elevation >2800)
+  filter(Site !=	"	Outlet.Vidette.below.20012")%>%  filter(Elevation >3200)
 
 diversity.env%>%
   #filter(Elevation >3100 ,Elevation <3500 )%>%
@@ -446,7 +446,7 @@ diversity.env%>%
 ############################################################################################################################################
 #NMDS
 species_env<-species%>%rownames_to_column("Site")%>%left_join(envs, by="Site")%>%filter(Fish!="NA")
-species_2<-species_env%>%column_to_rownames("Site")%>%dplyr::select(c(Acentrella:Zapada))
+species_2<-species_env%>%filter(Elevation>3200)%>%column_to_rownames("Site")%>%dplyr::select(c(Acentrella:Zapada))
 
 sset.seed(99)
 species<-species_2
@@ -510,9 +510,9 @@ cwm<-cwm%>%rownames_to_column("Site")
 datas<-left_join(envs,cwm, by="Site")
 
 datasz<-datas%>%
-  filter(River.dist.lake>0.1)%>%
+  #filter(River.dist.lake>0.1)%>%
   filter(O.NET != "YOUNG")%>%
-  filter(Elevation >3100 ,Elevation <3500 )
+  filter(Elevation >3200)
   #filter(Elevation >3150 ,Elevation <3500 )
   #filter(Head.river.dist>2.3)%>%
   #filter(Fish != "NA")%>%
@@ -556,7 +556,6 @@ datasz%>%
 
 fig5b<-datasz%>%
   #filter(Fish != "NA")%>%
-  filter(Elevation >3100 ,Elevation <3500 )%>%
   ggplot(aes(x = as.factor(Fish), y = Body_mass_mg, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("no", "yes"))+
@@ -593,7 +592,7 @@ r2(dog)
 
 #Fish  By Elevation
 supp.c<-stream.elev%>%
-  filter(Elevation >3200)%>%#,Elevation <3700 )%>%
+  filter(Elevation >3200)%>%
   ggplot(aes(x = as.factor(Fish), y = Elevation, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -627,7 +626,7 @@ supp.d<-stream.elev%>%
 
 
 diversity.env%>%
-  filter(Elevation >3100 ,Elevation <3525 )%>%
+  filter(Elevation >3200)%>%
   ggplot(aes(x = as.factor(Fish), fill=as.factor(Fish)))+ 
   geom_bar(stat="count")+
   stat_count(geom = "text", colour = "black", size = 3.5,
