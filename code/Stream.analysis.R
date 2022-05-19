@@ -259,7 +259,6 @@ diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"	Outlet.Vidette.below.20012")%>%  filter(Elevation >3200)
 
 diversity.env%>%
-  #filter(Elevation >3100 ,Elevation <3500 )%>%
   gather(  N0, N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=var))+
   geom_point()+
