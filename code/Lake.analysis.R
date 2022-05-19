@@ -557,11 +557,12 @@ fig6a<-env_cwm%>%
   ggplot(aes(x=lake_elevation_nbr,y=CWM,colour=actual_fish_presence))+
   geom_point()+
   geom_smooth(method = "lm")+
-  scale_color_viridis_d(name = "Fish Presence")+
-  facet_grid(~actual_fish_presence)+
+  scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
+  facet_grid(~actual_fish_presence, scales="free")+
   xlab("Elevation (m)")+  ggtitle("a)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none",legend.box.background = element_rect(colour = "black"))
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = "none")
 
 env_cwm%>%
   ggplot(aes(x=log(lake_area_nbr+1),y=CWM,colour=actual_fish_presence))+

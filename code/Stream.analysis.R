@@ -530,20 +530,17 @@ datasz%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 fig6b<-datasz%>%
-  filter(Fish !="NA")%>%
-  #filter(Elevation>2790)%>%
-  ggplot(aes(x = Elevation, y = Body_mass_mg, colour=as.factor(Fish)))+ #, colour=as.factor(Fish))) + #remove , fill=Network and see what the grpah looks like, are there tredns that both entowrks share together
+  ggplot(aes(x = Elevation, y = Body_mass_mg, colour=Fish))+ #, colour=as.factor(Fish))) + #remove , fill=Network and see what the grpah looks like, are there tredns that both entowrks share together
   geom_point()+
-  #geom_smooth(method = "lm")+
-  stat_smooth(method = glm, method.args = list(family = gaussian(link="identity")))+
-  scale_color_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  theme_bw()+ylab("CWM")+xlab("Elevation (m)")+  ggtitle("b)") +
-  facet_grid(~as.factor(Fish),scales = "free")+
+  #stat_smooth(method = glm, method.args = list(family = gaussian(link="identity")))+
+  scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
+  ylab("CWM")+xlab("Elevation (m)")+  ggtitle("b)") +
+  facet_grid(~Fish,scales = "free")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank(), legend.position = c(0.75, 0.87),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.75, 0.82),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
-
-datasz%>%
+sdatasz%>%
   gather(Head.river.dist,River.dist.lake,key = "var", value = "value") %>% #PC2,PC3,PC4,River.dist.lake,
   ggplot(aes(x = value, y = Body_mass_mg))+ #, colour=as.factor(Fish))) + #remove , fill=Network and see what the grpah looks like, are there tredns that both entowrks share together
   geom_point()+
@@ -562,7 +559,6 @@ fig5b<-datasz%>%
   xlab("Fish Presence")+ylab("CWM")+
   labs(fill='Fish Presence') +
   ggtitle("b)") +
-  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
   theme(legend.position = c(0.5, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
