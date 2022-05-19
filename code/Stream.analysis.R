@@ -341,9 +341,7 @@ diversity.env%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
-
 fig2e<-diversity.env%>%
-  filter(Elevation >2790)%>%
   ggplot(aes(x=as.factor(Fish), y=N1, fill=as.factor(Fish)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -355,7 +353,6 @@ fig2e<-diversity.env%>%
 
 
 fig2f<-diversity.env%>%
-  filter(Elevation >2790)%>%
   ggplot(aes(x=as.factor(Fish), y=betas.LCBD, fill=as.factor(Fish)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -365,7 +362,6 @@ fig2f<-diversity.env%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 fig2g<-diversity.env%>%
-  filter(Elevation >2790)%>%
   ggplot(aes(x=as.factor(Fish), y=Com.Size, fill=as.factor(Fish)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
