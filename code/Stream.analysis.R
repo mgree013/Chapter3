@@ -29,7 +29,7 @@ species_biomass<-species%>%rownames_to_column("Site")%>%pivot_longer(-Site,names
 species_biomass
 
 all_biomass_density<-left_join(species_biomass,traits, by="Taxon")%>%
-  mutate(Biomass=Number_ind*M)%>%dplyr::select(c(Taxon,Site,Density,Number_ind,M,Biomass))
+  mutate(Biomass=Number_ind*M)%>%dplyr::select(c(Taxon,Site,Density,Number_ind,M,Biomass,Feed_prim_abbrev))
 str(all_biomass_density)
 ###########################################
 #organize data
@@ -193,12 +193,13 @@ species_mass_data_env_sum<-species_mass_data_env%>%
   summarise(Mean_density=mean(log(abundance+1)))%>%
   filter(Fish !="NA")%>%
   pivot_wider(names_from = Fish,values_from = Mean_density)%>%
-  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))
+  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))%>%
+  left_join(traits_FFG, by="Taxon")
 
-
+traits_FFG<-traits%>%dplyr::select(c(Taxon, Feed_prim_abbrev))
 species_mass_data_env_sum%>%
   filter(change_density>0)%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=abs.change))+
+  ggplot(aes(x=log(Body_mass_mg+1),y=change_density))+
   geom_point()+
   geom_smooth(method = "lm")+
   ylab("Change Macro Density")+xlab("Maco Body Size")+
@@ -206,14 +207,27 @@ species_mass_data_env_sum%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 species_mass_data_env_sum%>%
-  filter(change_1_density>0)%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=change_1_density))+
+  filter(relative_change != "NA")%>%
+  ggplot(aes(x=log(Body_mass_mg+1),y=relative_change))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ylab("Change Macro Density")+xlab("Maco Body Size")+
+  geom_hline(yintercept=1, linetype='dotted', col = 'black')+
+  ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Body Mass")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+species_mass_data_env_sum%>%
+  filter(relative_change != "NA")%>%
+  ggplot(aes(x=Elevation,y=relative_change))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  geom_hline(yintercept=1, linetype='dotted', col = 'black')+
+  ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Body Mass")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
+dog<-lm(relative_change~log(Body_mass_mg+1),species_mass_data_env_sum)
+summary(dog)
 
 species_mass_data_env_sum%>%
   filter(relative_change != "NA")%>%

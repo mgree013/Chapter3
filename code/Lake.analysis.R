@@ -454,7 +454,8 @@ env_abundz_filter%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=change_density))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
+  geom_hline(yintercept=0, linetype='dotted', col = 'black')+
+  ylab("Change Zooplankton Density")+xlab("Zooplankton Body Size")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
@@ -465,6 +466,7 @@ env_abundz_filter%>%
   filter(change_1_density>0)%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=change_1_density))+
   geom_point()+
+  geom_hline(yintercept=0, linetype='dotted', col = 'black')+
   geom_smooth(method = "lm")+
   ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -481,6 +483,19 @@ env_abundz_filter_plot%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+
+env_abundz_filter_plot%>%
+  filter(relative_change != "NA")%>%
+  ggplot(aes(x= log(Body_mass_ug+1),y=relative_change))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  geom_hline(yintercept=1, linetype='dotted', col = 'black')+
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Body Mass")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
+summary(dog)
 
 env_abundz_filtered<-env_abundzzz%>%
   filter(Taxon !="Collotheca_spp." ,Taxon !="Eurycercus_lamellatus" ,Taxon !="Lecane_spp." ,Taxon !="Monostyla_spp." ,Taxon !="Polyarthra_vulgaris" ,Taxon !="Simocephalus_serrulatus" )
