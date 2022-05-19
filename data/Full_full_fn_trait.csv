@@ -136,7 +136,7 @@ Sweltsa,Sweltsa,8.797269444,13.5,0.0065,2.724,Sweltsa,Chloroperlidae,Plecoptera,
 Tabanus,Tabanus,6.281787423,16,0.0054,2.546,Tabanus,Tabanidae,Diptera,,,,,,,,,,,,,,,,,,
 Tipula,Tipula,10.16875835,21,0.0029,2.681,Tipula,Tipulidae,Diptera,medium,not_streamlined,none,gills,SH,BU,depo_eros,rare,low,weak,low,none,absent,present,univoltine,slow,short,NP
 Turbellaria,Turbellaria,0.030679362,2.168,0.0056,2.198,Turbellaria,Turbellaria,Turbellaria,small,streamlined,none,pores,PR,BU,depo_eros,rare,low,none,very_low,weak,absent,absent,bi_multivoltine,slow,very_short,NP
-Wiedeman,Wiedemannia,0.325065883,5,0.0054,2.546,Wiedemannia,Empididae,Diptera,medium,not_streamlined,none,tegument,PR,CN,depo_eros,rare,low,weak,low,none,present,absent,univoltine,slow,very_short,NP
+Wiedeman,Wiedeman,0.325065883,5,0.0054,2.546,Wiedemannia,Empididae,Diptera,medium,not_streamlined,none,tegument,PR,CN,depo_eros,rare,low,weak,low,none,present,absent,univoltine,slow,very_short,NP
 Wormaldia,Yoraperla,7.017858546,10.7,0.0141,2.62,Yoraperla,Peltoperlidae,Plecoptera,medium,streamlined,good,gills,SH,CN,eros,common,low,weak,low,weak,absent,absent,univoltine,fast,very_short,NP
 Yoraperla,Yphria,2.51842527,8.9,0.0054,2.811,Yphria,Phryganeidae,Trichoptera,small,not_streamlined,poor,gills,PR,BU,eros,rare,low,weak,low,none,absent,absent,univoltine,slow,long,CCE
 Zapada,Zapada,0.789662984,6,0.0056,2.762,Zapada,Nemouridae,Plecoptera,small,not_streamlined,none,gills,SH,SP,depo_eros,common,low,weak,very_low,weak,absent,absent,semivoltine,fast,very_short,CCE

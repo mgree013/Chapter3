@@ -19,12 +19,18 @@ setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
 species<-read.csv(file = "sp.density.update.12.28.19_traits.csv",row.names = 1)
 summary(species)
 
-traits<-read.csv("Full_full_fn_trait.csv")
+traits<-read.csv("data/Full_full_fn_trait.csv")
 summary(traits)
 
 envs <-read.csv("dave.matt.env.full.12.29.19.csv")
 summary(envs)
 
+species_biomass<-species%>%rownames_to_column("Site")%>%pivot_longer(-Site,names_to = "Taxon", values_to= "Density")%>%mutate(Number_ind=Density*.412)
+species_biomass
+
+all_biomass_density<-left_join(species_biomass,traits, by="Taxon")%>%
+  mutate(Biomass=Number_ind*M)%>%dplyr::select(c(Taxon,Site,Density,Number_ind,M,Biomass))
+str(all_biomass_density)
 ###########################################
 #organize data
 envs<-envs%>%mutate(Euc.dist.lake=log(Euc.dist.lake+1),River.dist.lake=log(River.dist.lake+1),Head.river.dist=log(Head.river.dist+1))
@@ -227,46 +233,19 @@ species<-species%>%dplyr::select(-c(Chironomidae,Acari,Nematomorpha,Oligochaeta,
 
 diversity<-species%>%
   transmute(N0=rowSums(species > 0),H= diversity(species),N1 =exp(H),N2 =diversity(species, "inv"),J= H/log(N0),E10= (N1/N0),E20= (N2/N0),Com.Size=log(rowSums(species)+1),betas.LCBD=beta.div(species, method="hellinger",sqrt.D=TRUE)$LCBD  )
-#Calculate Beta Diversity (LCBD) for each network
-#combine<-cbind(species,env$O.NET)
 
-#kern<-subset(combine, `env$O.NET`=="KERN")
-#kern.var<-kern[, colSums(kern != 0) > 0]
-#kern.beta<-beta.div(kern.var[1:61], method="hellinger",sqrt.D=TRUE)
-#kern.beta.comp<-beta.div.comp(kern.var[1:61], coef = "S", quant=T)
+#Add Community Biomass
+all_biomass_density_div<-all_biomass_density%>%filter(Density>0)%>%
+  dplyr::select(-c(Density,M,Number_ind))%>%
+  #pivot_wider(names_from = Taxon, values_from=Biomass)%>%
+  group_by(Site)%>%
+  dplyr::summarize(Biomass=sum(Biomass))%>%
+  mutate(Biomass=log(Biomass+1))
 
-#casc<-subset(combine, `env$O.NET`=="CASCADE")
-#casc.var<-casc[, colSums(casc != 0) > 0]
-#casc.beta<-beta.div(casc.var[1:44], method="hellinger",sqrt.D=TRUE)
-#casc.beta.comp<-beta.div.comp(casc.var[1:44], coef = "S", quant=T)
-
-#evo<-subset(combine, `env$O.NET`=="EVO")
-#evo.var<-evo[, colSums(evo != 0) > 0]
-#evo.beta<-beta.div(evo.var[1:36], method="hellinger",sqrt.D=TRUE)
-#evo.beta.comp<-beta.div.comp(evo.var[1:36], coef = "S", quant=T)
-
-#bubb<-subset(combine, `env$O.NET`=="BUBBS")
-#bubb.var<-bubb[, colSums(bubb != 0) > 0]
-#bubb.beta<-beta.div(bubb.var[1:83], method="hellinger",nperm=999,sqrt.D=TRUE)
-#bubb.beta.comp<-beta.div.comp(bubb.var[1:83], coef = "S", quant=T)
-
-#young<-subset(combine, `env$O.NET`=="YOUNG")
-#young.var<-young[, colSums(young != 0) > 0]
-#young.beta<-beta.div(young.var[1:29], nperm=999,method="hellinger",sqrt.D=TRUE)
-#young.beta.comp<-beta.div.comp(young.var[1:29], coef = "S", quant=T)
-
-#rock<-subset(combine, `env$O.NET`=="ROCK")
-#rock.var<-rock[, colSums(rock != 0) > 0]
-#rock.beta<-beta.div(rock.var[1:60], nperm=999,method="hellinger",sqrt.D=TRUE)
-#ock.beta.comp<-beta.div.comp(rock.var[1:60], coef = "S", quant=T)
-
-#betas.LCBD<-c(kern.beta$LCBD,casc.beta$LCBD,evo.beta$LCBD,bubb.beta$LCBD,young.beta$LCBD,rock.beta$LCBD)
-#betas.LCBD<-as.data.frame(betas.LCBD)
-#betas.LCBD.data<-betas.LCBD%>%rownames_to_column("Site")
 diversity.data<-diversity%>%rownames_to_column("Site")
 
 #all<-diversity.data%>%left_join(env,by="Site")%>%left_join(betas.LCBD.data,by="Site")#%>%filter(Elevation >2790)
-all<-diversity.data%>%left_join(envs,by="Site")%>%  filter(Elevation >3200)
+all<-diversity.data%>%left_join(envs,by="Site")%>%left_join(all_biomass_density_div,by="Site")%>%filter(Elevation >3200)
 diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"Outlet.11007.fishless.2003")%>%
   filter(Site !=	"Outlet.11007.fishless.2004")%>%
@@ -281,7 +260,7 @@ diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
 
 diversity.env%>%
   #filter(Elevation >3100 ,Elevation <3500 )%>%
-  gather(  N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
+  gather(  N0, N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=var))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
@@ -291,29 +270,37 @@ diversity.env%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
-fig3d<-diversity.env%>%
+fig3e<-diversity.env%>%
   ggplot(aes(x=Elevation, y=N1))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
-  ggtitle("d)") +
+  ggtitle("e)") +
   xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
-fig3e<-diversity.env%>%
-  ggplot(aes(x=Elevation, y=Com.Size))+
-  geom_point()+
-  geom_smooth(method = "lm",se=T)+
-  ggtitle("e)") +
-  xlab("Elevation (m)")+ylab("Community Size")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
-
-fig3f<-diversity.env%>%  ggplot(aes(x=Elevation, y=betas.LCBD))+
+fig3f<-diversity.env%>%ggplot(aes(x=Elevation, y=betas.LCBD))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
   xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
   ggtitle("f)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
+fig3g<-diversity.env%>%
+  ggplot(aes(x=Elevation, y=Com.Size))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  ggtitle("g)") +
+  xlab("Elevation (m)")+ylab("Community Size")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
+fig3h<-diversity.env%>%  ggplot(aes(x=Elevation, y=(Biomass)))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  xlab("Elevation (m)")+ylab("Community Biomass")+
+  ggtitle("h)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
@@ -355,28 +342,16 @@ diversity.env%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 
-fig2d<-diversity.env%>%
+fig2e<-diversity.env%>%
   filter(Elevation >2790)%>%
   ggplot(aes(x=as.factor(Fish), y=N1, fill=as.factor(Fish)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+ylab("Species (Shannon) Diversity")+
-  ggtitle("d)") +
+  ggtitle("e)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+
   theme(legend.position = c(0.70, 0.89),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
-
-
-
-fig2e<-diversity.env%>%
-  filter(Elevation >2790)%>%
-  ggplot(aes(x=as.factor(Fish), y=Com.Size, fill=as.factor(Fish)))+
-  geom_boxplot()+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  xlab("Fish Presence")+ylab("Community Size")+
-  ggtitle("e)") +
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 
 fig2f<-diversity.env%>%
@@ -389,10 +364,29 @@ fig2f<-diversity.env%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
+fig2g<-diversity.env%>%
+  filter(Elevation >2790)%>%
+  ggplot(aes(x=as.factor(Fish), y=Com.Size, fill=as.factor(Fish)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Community Size")+
+  ggtitle("g)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+fig2h<-diversity.env%>%
+  ggplot(aes(x=as.factor(Fish), y=Biomass, fill=as.factor(Fish)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Community Biomass")+
+  ggtitle("h)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
 
 diversity.env%>%
   filter(Elevation >3100 ,Elevation <3500 )%>%
-  gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
+  gather(N0, N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=Elevation, y=value, colour=as.factor(Fish)))+
   geom_point()+
   geom_smooth(method = "lm",se=F)+

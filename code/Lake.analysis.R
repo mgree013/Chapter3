@@ -39,6 +39,25 @@ clean_zoopzz<-zoopzz%>%
   dplyr::select(c(lake_id,survey_date,Species_Name,zoop_density))%>% 
   distinct(lake_id,survey_date,Species_Name,zoop_density) #remove duplicates in data
 
+#Biomass
+zoop_body_mass<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
+
+clean_zoopz_biomass<-zoopzz%>%
+  left_join(dt8.1,by=c("lake_id", "survey_date"))%>%
+  group_by(lake_id,survey_date)%>%
+  mutate(Max.Subsample=max(Subsample))%>%
+  ungroup()%>%
+  group_by(lake_id,survey_date,Species_Name)%>%
+  mutate(Counts=sum(Number),
+         Species_Name = str_replace(Species_Name, " ", "_"), #replace spaces in names with "_"
+         Species_Name = str_replace(Species_Name, "/", "_"))%>% #replace / in names with "_")%>%
+  dplyr::rename(Taxon=Species_Name)%>%
+  left_join(zoop_body_mass, by="Taxon")%>%
+  group_by(lake_id,survey_date,Taxon)%>%
+  mutate(Biomass=Counts*Body_mass_ug)%>%
+  dplyr::select(c(lake_id,survey_date,Taxon,Biomass))
+  
+
 #########################################################################
 #1B) Pivot Data Set long to wide format for Species abundance Matrix
 site.sp.quad <- cast(clean_zoopzz, lake_id+survey_date ~ Species_Name, value='zoop_density') 
@@ -62,6 +81,16 @@ diversity<-species%>%
 #Add back site info and treatments to diversity data
 local_diversity<-cbind(diversity, site.sp.quad[,1:2])
 
+clean_zoopz_biomass_site<-clean_zoopz_biomass%>%
+  filter(Taxon!="standard_measurement")%>%
+  filter(Biomass>0)%>%
+  group_by(lake_id, survey_date)%>%
+  summarise(Sum.Biomass=sum(Biomass))
+
+local_diversity<-local_diversity%>%left_join(clean_zoopz_biomass_site,by=c("lake_id", "survey_date"))
+
+str(local_diversity)
+str(clean_zoopz_biomass_site)
 #########################################################################
 #Part 1C) Organize Environmental Data Set and merge with Species Data
 
@@ -122,7 +151,7 @@ mapview(snw_sf, zcol="actual_fish_presence", layer.name="Fish Presence")
 #2B) Explore Relationships among Diversity as a function of environmental variables: Visualization and Stats
 
 env_div<-left_join(env,local_diversity, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%
-  mutate(Com.Size=log(Com.Size+1))%>%
+  mutate(Com.Size=log(Com.Size+1), Biomass=log(Sum.Biomass+1))%>%
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 supp.b<-env_div%>%
@@ -150,7 +179,7 @@ supp.a<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 env_div%>%
-  gather(N0,  N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
+  gather(N0,  N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=var))+
   geom_point()+
   geom_smooth(method = "lm",se=F)+
@@ -161,7 +190,7 @@ env_div%>%
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
 env_div%>%
-  gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
+  gather(N0, N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=actual_fish_presence))+
   geom_point()+
   geom_smooth(method = "lm",se=F)+
@@ -194,22 +223,32 @@ fig3a<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())
 
 fig3b<-env_div%>%
-  ggplot(aes(x=lake_elevation_nbr, y=Com.Size))+
-  geom_point()+
-  geom_smooth(method = "lm",se=T)+
-  scale_color_viridis_d()+
-  ggtitle("b)") +
-  xlab("Elevation (m)")+ylab("Community Size")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())
-
-fig3c<-env_div%>%
   ggplot(aes(x=lake_elevation_nbr, y=betas.LCBD))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
   scale_color_viridis_d()+
-  ggtitle("c)") +
+  ggtitle("b)") +
   xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())
+
+fig3c<-env_div%>%
+  ggplot(aes(x=lake_elevation_nbr, y=Com.Size))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  scale_color_viridis_d()+
+  ggtitle("c)") +
+  xlab("Elevation (m)")+ylab("Community Size")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())
+
+fig3d<-env_div%>%
+  ggplot(aes(x=lake_elevation_nbr, y=Biomass))+
+  geom_point()+
+  geom_smooth(method = "lm",se=T)+
+  scale_color_viridis_d()+
+  ggtitle("d)") +
+  xlab("Elevation (m)")+ylab("Community Biomass")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
@@ -238,7 +277,7 @@ r2(dog)
 #########################################################################
 #Diversity as a function of fish presence/absence
 env_div%>%
-  gather(N0, N1,  E10, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
+  gather(N0, N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=actual_fish_presence, y=value, fill=actual_fish_presence))+
   geom_boxplot()+
   xlab("Fish Presence")+
@@ -285,20 +324,29 @@ fig2a<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 fig2b<-env_div%>%
-  ggplot(aes(x=actual_fish_presence, y=Com.Size, fill=as.factor(actual_fish_presence)))+
+  ggplot(aes(x=actual_fish_presence, y=betas.LCBD, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  xlab("Fish Presence")+ylab("Community Size")+
+  xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
   ggtitle("b)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 fig2c<-env_div%>%
-  ggplot(aes(x=actual_fish_presence, y=betas.LCBD, fill=as.factor(actual_fish_presence)))+
+  ggplot(aes(x=actual_fish_presence, y=Com.Size, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
+  xlab("Fish Presence")+ylab("Community Size")+
   ggtitle("c)") +
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+fig2d<-env_div%>%
+  ggplot(aes(x=actual_fish_presence, y=Biomass, fill=as.factor(actual_fish_presence)))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Fish Presence")+ylab("Community Biomass")+
+  ggtitle("d)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
