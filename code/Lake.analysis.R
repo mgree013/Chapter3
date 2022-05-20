@@ -779,4 +779,9 @@ species<-sp_abund_env_filter[,3:39]
 lake.rel<-decostand(species,"total") #standardize community data
 lake.bray<-vegdist(lake.rel) 
 
+distance<-matrix(c(sp_abund_env_filter$Lat,sp_abund_env_filter$Lon, sp_abund_env_filter$Elevation),nrow=297, ncol=3)
+dist<-dist(distance, method="euclidean")
+
+plot(dist,lake.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Zooplankton dissimilarity (bray-curtis)", ylim=c(0,1))
+summary(lm(lake.bray ~ dist))
 ####################################################################################################################################################################################################################################################################################################

@@ -8,7 +8,7 @@
 
 ###########################################
 #Load Packages
-Packages <- c("tidyverse", "ggplot2", "vegan", "reshape2","reshape", "betareg","adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
+Packages <- c("tidyverse","otuSummary", "ggplot2", "vegan", "reshape2","reshape", "betareg","adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
 lapply(Packages, library, character.only = TRUE)
 
 setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
@@ -642,12 +642,51 @@ diversity.env%>%
 
 ############################################################################################################################################
 #Beta
-env_elevation<-envs%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site))
-species_env<-species_env%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site,Fish))
+species<-read.csv(file = "data/sp.density.update.12.28.19_traits.csv")
+envs <-read.csv("data/dave.matt.env.full.12.29.19.csv")
 
-species<-species_2%>%rownames_to_column("Site")%>%left_join(env_elevation, by="Site")%>%
-  filter(Elevation >3200)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")#%>%dplyr::select(-c(Chironomidae,Nematomorpha,Oligochaeta,Ostracoda,Turbellaria,Euhirudinea))
-dune.rel<-decostand(species,"hellinger") #standardize community data
+new_species_envs<-envs%>%left_join(species, by="Site")%>%filter(Elevation >3200)
+
+species_beta<-new_species_envs%>%dplyr::select(c(Site, Acari:Zapada))%>%column_to_rownames("Site")
+env_beta<-new_species_envs%>%dplyr::select(c(Site:Fish))
+
+
+dune.rel<-decostand(species_beta,"total") #standardize community data
 dune.bray<-vegdist(dune.rel)
+str(species)
+str(env_elevation)
 
+#distance<-matrix(c(env_beta$Lat,env_beta$Lon, env_beta$Elevation),nrow=70, ncol=3)
+#dist<-dist(distance, method="euclidean")
+
+env_beta_dist<-env_beta%>%column_to_rownames("Site")%>%dplyr::select(c(Elevation,Lon,Lat))
+spatial.dist<-vegdist(env_beta_dist, "euclidean")
+
+plot(dist,dune.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Macro dissimilarity (bray-curtis)", ylim=c(0,1))
+
+dune.bray.df<-matrixConvert(dune.bray, colname = c("site1", "site2", "cmtny.dist"))
+dist.df<-matrixConvert(spatial.dist, colname = c("site1", "site2", "spatial.dist"))
+
+
+site.fish.1<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site1="Site")%>%dplyr::rename(fish1="Fish")
+site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%dplyr::rename(fish2="Fish")
+stream.df<-dune.bray.df%>%left_join(dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
+
+stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                             "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                              "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                    "NofishnoFish","NoFish2fish"))))
+
+
+
+stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  facet_grid(~Fish.turnover)
+
+stream.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
+  geom_boxplot()
+
+dog<-lm(cmtny.dist ~ spatial.dist,stream.df)
+summary(dog)
 ############################################################################################################################################
