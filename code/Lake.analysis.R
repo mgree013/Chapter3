@@ -795,25 +795,25 @@ lake.df<-lake.bray.df%>%left_join(lake.dist.df,  by=c("site1", "site2"))%>%left_
 lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                                     "NofishnoFish","NoFish2fish"))))
+                                                                                                     "Nofish2noFish","NoFish2fish"))))
 
 
-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
+beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
   facet_grid(~Fish.turnover)+
   scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Fish Turnover")+
-  ggtitle("b)") +
+  ggtitle("a)") +
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-lake.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
+beta.stream.b<-lake.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Fish Turnover")+
-  ggtitle("a)") +
+  ggtitle("b)") +
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
