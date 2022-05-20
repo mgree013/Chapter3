@@ -775,13 +775,56 @@ lake.elev.fish<-env_div%>%
 sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
   filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
-species<-sp_abund_env_filter[,3:39]
+specie<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))
+species<-specie
 lake.rel<-decostand(species,"total") #standardize community data
 lake.bray<-vegdist(lake.rel) 
 
-distance<-matrix(c(sp_abund_env_filter$Lat,sp_abund_env_filter$Lon, sp_abund_env_filter$Elevation),nrow=297, ncol=3)
-dist<-dist(distance, method="euclidean")
+env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
+lake.dist<-vegdist(env_beta_dist, "euclidean")
 
-plot(dist,lake.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Zooplankton dissimilarity (bray-curtis)", ylim=c(0,1))
-summary(lm(lake.bray ~ dist))
+plot(spatial.dist,lake.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Zooplankton dissimilarity (bray-curtis)", ylim=c(0,1))
+
+lake.bray.df<-matrixConvert(lake.bray, colname = c("site1", "site2", "cmtny.dist"))
+lake.dist.df<-matrixConvert(lake.dist, colname = c("site1", "site2", "spatial.dist"))
+
+site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
+site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
+lake.df<-lake.bray.df%>%left_join(lake.dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
+
+lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                                     "NofishnoFish","NoFish2fish"))))
+
+
+lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Fish Turnover")+
+  ggtitle("b)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Fish Turnover")+
+  ggtitle("a)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+dog<-lm(cmtny.dist ~ spatial.dist*Fish.turnover,lake.df.filter)
+summary(dog)
+
+dog<-lm(cmtny.dist ~ spatial.dist,lake.df.filter)
+summary(dog)
+
+dog<-glm(cmtny.dist ~ Fish.turnover,family=gaussian(link="identity"),lake.df.filter)
+summary(dog)
+r2(dog)
 ####################################################################################################################################################################################################################################################################################################

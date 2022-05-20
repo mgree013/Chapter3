@@ -679,14 +679,26 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
 
 
 
-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+
+stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
-  facet_grid(~Fish.turnover)
+  facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Fish Turnover")+
+  ggtitle("b)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 stream.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
-  geom_boxplot()
+  geom_boxplot()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Fish Turnover")+
+  ggtitle("b)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-dog<-lm(cmtny.dist ~ spatial.dist,stream.df)
+dog<-lm(cmtny.dist ~ spatial.dist*Fish.turnover,stream.df.filter)
 summary(dog)
 ############################################################################################################################################
