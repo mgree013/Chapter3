@@ -206,14 +206,15 @@ species_mass_data_env_sum%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
-species_mass_data_env_sum%>%
+new.fig1b<-species_mass_data_env_sum%>%
   filter(relative_change != "NA")%>%
   ggplot(aes(x=log(Body_mass_mg+1),y=relative_change))+
   geom_point()+
+  ggtitle("b)") +
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Body Mass")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 species_mass_data_env_sum%>%
@@ -640,4 +641,13 @@ diversity.env%>%
   theme(legend.position = c(0.25, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 ############################################################################################################################################
+#Beta
+env_elevation<-envs%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site))
+species_env<-species_env%>%filter(Elevation >3200)%>%dplyr::select(c(Elevation,Site,Fish))
 
+species<-species_2%>%rownames_to_column("Site")%>%left_join(env_elevation, by="Site")%>%
+  filter(Elevation >3200)%>%dplyr::select(-c(Elevation))%>%column_to_rownames("Site")#%>%dplyr::select(-c(Chironomidae,Nematomorpha,Oligochaeta,Ostracoda,Turbellaria,Euhirudinea))
+dune.rel<-decostand(species,"hellinger") #standardize community data
+dune.bray<-vegdist(dune.rel)
+
+############################################################################################################################################

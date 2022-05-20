@@ -484,15 +484,15 @@ env_abundz_filter_plot%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 
-env_abundz_filter_plot%>%
+new.fig1a<-env_abundz_filter_plot%>%
   filter(relative_change != "NA")%>%
   ggplot(aes(x= log(Body_mass_ug+1),y=relative_change))+
   geom_point()+
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
-  #facet_wrap(~actual_fish_presence, scales="free")+
+  ggtitle("a)") +
   ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Body Mass")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
 summary(dog)
@@ -770,4 +770,13 @@ lake.elev.fish<-env_div%>%
 #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+####################################################################################################################################################################################################################################################################################################
+#Beta
+sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
+  filter(HA>=0.5)%>%filter(lake_max_depth>3)
+
+species<-sp_abund_env_filter[,3:39]
+lake.rel<-decostand(species,"total") #standardize community data
+lake.bray<-vegdist(lake.rel) 
+
 ####################################################################################################################################################################################################################################################################################################

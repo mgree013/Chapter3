@@ -6,6 +6,7 @@ library(cowplot)
 # Figure 1
 plot_grid(fig1a,fig1b, nrow=2)
 
+plot_grid(new.fig1a,new.fig1b, nrow=1)
 
 ###########################################################################
 # Figure 2

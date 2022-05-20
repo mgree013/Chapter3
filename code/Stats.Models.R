@@ -155,6 +155,23 @@ r2(mod3)
 ######################################################################################################################################################
 #Species Responses
 
+#Relative Change
+
+mod0<-glm(relative_change~log(Body_mass_ug+1),family=gaussian(link="identity"),env_abundz_filter_plot)
+modnull<-glm(relative_change~1,family=gaussian(link="identity"),env_abundz_filter_plot)
+reported.table2 <- bbmle::AICtab(mod0,modnull,weights = TRUE, sort = FALSE)
+reported.table2
+r2(mod0)
+
+
+mod0<-glm(relative_change~log(Body_mass_mg+1),family=gaussian(link="identity"),species_mass_data_env_sum)
+modnull<-glm(relative_change~1,family=gaussian(link="identity"),species_mass_data_env_sum)
+reported.table2 <- bbmle::AICtab(mod0,modnull,weights = TRUE, sort = FALSE)
+reported.table2
+r2(mod0)
+
+#Ind Species Models
+
 ######################################################################################################################################################
 #Supplemental
 
