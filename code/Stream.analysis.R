@@ -664,15 +664,19 @@ str(env_elevation)
 env_beta_dist<-env_beta%>%column_to_rownames("Site")%>%dplyr::select(c(Elevation,Lon,Lat))
 spatial.dist<-vegdist(env_beta_dist, "euclidean")
 
+cwm_dist<-datas%>%column_to_rownames("Site")%>%dplyr::select(c(Body_mass_mg))
+cwm.dist<-vegdist(cwm_dist, "euclidean")
+
 plot(dist,dune.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Macro dissimilarity (bray-curtis)", ylim=c(0,1))
 
 dune.bray.df<-matrixConvert(dune.bray, colname = c("site1", "site2", "cmtny.dist"))
 dist.df<-matrixConvert(spatial.dist, colname = c("site1", "site2", "spatial.dist"))
+cwm.df<-matrixConvert(cwm.dist, colname = c("site1", "site2", "cwm.dist"))
 
 
 site.fish.1<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site1="Site")%>%dplyr::rename(fish1="Fish")
 site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%dplyr::rename(fish2="Fish")
-stream.df<-dune.bray.df%>%left_join(dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
+stream.df<-dune.bray.df%>%left_join(dist.df,  by=c("site1", "site2"))%>%left_join(cwm.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
 
 stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                              "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
@@ -696,6 +700,17 @@ beta.stream.d<-stream.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Fish Turnover")+
   ggtitle("d)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+stream.df.filter%>%ggplot(aes(x=log(cwm.dist+1), y=cmtny.dist))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("CWM Dissimilarity")+
+  ggtitle("c)") +
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
