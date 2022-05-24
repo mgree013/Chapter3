@@ -680,7 +680,6 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
                                                                                     "Nofish2noFish","NoFish2fish"))))
 
 
-
 beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
