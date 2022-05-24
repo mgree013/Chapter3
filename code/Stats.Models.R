@@ -170,7 +170,6 @@ reported.table2 <- bbmle::AICtab(mod0,modnull,weights = TRUE, sort = FALSE)
 reported.table2
 r2(mod0)
 
-#Ind Species Models
 
 ######################################################################################################################################################
 #Supplemental
@@ -182,5 +181,22 @@ summary(mod0)
 #streams
 mod0<-glm(Elevation~Fish,family= gaussian(link = "identity") ,stream.elev)
 summary(mod0)
+
+######################################################################################################################################################
+#Ind Species Models
+
+#A) Lakes
+mod0<-glm(Body_mass_mg~Fish,family = gaussian(link="identity"), data=datasz)
+mod1<-glm(Body_mass_mg~Elevation,family = gaussian(link="identity"), data=datasz)
+mod2<-glm(Body_mass_mg~Elevation*Fish,family =gaussian(link="identity"), data=datasz)
+mod3<-glm(Body_mass_mg~1,family =gaussian(link="identity"), data=datasz)
+reported.table2 <- bbmle::AICtab(mod0,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
+reported.table2
+r2(mod0)
+r2(mod1)
+r2(mod2)
+
+
+
 
 ######################################################################################################################################################

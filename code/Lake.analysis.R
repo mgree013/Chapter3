@@ -512,6 +512,28 @@ fig1a<-env_abundz_filtered%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+env_abundzzz_new<-env_abundzzz%>%
+  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)%>%
+  dplyr::select(c(lake_id,survey_date,Taxon,zoop_density,actual_fish_presence,lake_elevation_nbr,Mean_body_size_mm))%>%
+  pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
+  replace(is.na(.), 0)%>%
+  pivot_longer(No:Yes,names_to = "Fish", values_to= "zoop_density")
+
+env_abundzzz_new<-env_abundzzz%>%
+  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)%>%
+  dplyr::select(c(lake_id,survey_date,Taxon,zoop_density,actual_fish_presence,lake_elevation_nbr,Mean_body_size_mm))
+  
+
+env_abundzzz_new%>%
+  ggplot(aes(x=actual_fish_presence,y=log(zoop_density+1),fill=actual_fish_presence))+
+  geom_boxplot()+
+  ggtitle("a)") +
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Zooplankton Log Density + 1")+xlab("Zooplankton Taxa")+
+  facet_wrap(~Taxon)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
 
 #Analysis: 
 #remove unwanted columns for analysis due to missing data
