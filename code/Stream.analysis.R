@@ -193,7 +193,9 @@ species_mass_data_env_sum<-species_mass_data_env%>%
   summarise(Mean_density=mean(log(abundance+1)))%>%
   filter(Fish !="NA")%>%
   pivot_wider(names_from = Fish,values_from = Mean_density)%>%
-  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))%>%
+  replace(is.na(.), 0)%>% 
+  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes),
+         new_change=(Yes-No)/(1/2*(Yes+No)))%>%
   left_join(traits_FFG, by="Taxon")
 
 traits_FFG<-traits%>%dplyr::select(c(Taxon, Feed_prim_abbrev))
@@ -208,7 +210,7 @@ species_mass_data_env_sum%>%
 
 new.fig1b<-species_mass_data_env_sum%>%
   filter(relative_change != "NA")%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=relative_change))+
+  ggplot(aes(x=log(Body_mass_mg+1),y=new_change))+
   geom_point()+
   ggtitle("b)") +
   geom_smooth(method = "lm")+
@@ -684,7 +686,7 @@ beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour
   geom_smooth(method="lm")+
   facet_grid(~Fish.turnover)+
   scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
   ggtitle("c)") +
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),

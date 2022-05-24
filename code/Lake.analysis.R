@@ -448,7 +448,9 @@ env_abundz_filter<-env_abundzzz%>%
   group_by(Taxon,actual_fish_presence,Body_mass_ug)%>%
   summarise(Mean_density=mean(log(zoop_density+1)))%>%
   pivot_wider(names_from=actual_fish_presence,values_from =Mean_density )%>%
-  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes))
+  replace(is.na(.), 0)%>% 
+  mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes),
+         new_change=(Yes-No)/(.5*(Yes+No)))
 
 env_abundz_filter%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=change_density))+
@@ -464,7 +466,7 @@ summary(dog)
 
 env_abundz_filter%>%
   filter(change_1_density>0)%>%
-  ggplot(aes(x=log(Body_mass_ug+1),y=change_1_density))+
+  ggplot(aes(x=log(Body_mass_ug+1),y=new_change))+
   geom_point()+
   geom_hline(yintercept=0, linetype='dotted', col = 'black')+
   geom_smooth(method = "lm")+
@@ -486,7 +488,7 @@ env_abundz_filter_plot%>%
 
 new.fig1a<-env_abundz_filter_plot%>%
   filter(relative_change != "NA")%>%
-  ggplot(aes(x= log(Body_mass_ug+1),y=relative_change))+
+  ggplot(aes(x= log(Body_mass_ug+1),y=new_change))+
   geom_point()+
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
@@ -803,7 +805,7 @@ beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=F
   geom_smooth(method="lm")+
   facet_grid(~Fish.turnover)+
   scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
   ggtitle("a)") +
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
