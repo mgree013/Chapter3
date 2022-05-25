@@ -496,9 +496,9 @@ env_abundz_filter_plot%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 
-new.fig1a<-env_abundz_filter_plot%>%
+new.fig1a<-env_abundz_filter_plot_1%>%
   filter(relative_change != "NA")%>%
-  ggplot(aes(x= log(Body_mass_ug+1),y=new_change))+
+  ggplot(aes(x= log(Body_mass_ug+1),y=relative_change))+
   geom_point()+
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
@@ -756,51 +756,6 @@ boxplot(mod)
 #The Drainage Basins explain most of the variation (19%), then elevation (7%), and then fish presence (1%)...still a lot fo unexplained variation
 #fish presence has larger hull indicating more community combinations, potentially confounded by elevation
 
-#########################################################################
-#2F) Structural Equation Models (SEM'S)-Causal Analysis
-
-
-smod1 = ' CWM ~ lake_elevation_nbr+actual_fish_presence+lake_max_depth+lake_area_nbr'
-
-smod1.fit <- sem(smod1,data=env_cwm)
-summary(smod1.fit,standardized=TRUE,rsq=T)
-fitMeasures(smod1.fit)
-modindices(smod1.fit)
-
-#quick plot of path analysis
-semPaths(smod1.fit, what='std', layout = "tree3", intercepts = FALSE, residuals = FALSE, 
-         edge.label.cex=1.25, curvePivot = FALSE,  fade=FALSE, rotation = 2)
-
-#Conc: Body Size negatively influenced by  elevation,area, fish, but positively influenced by lake depth
-#fish presnece also negatively influenced by elevation, indirectly
-#########################################################################
-smod2 = ' N0 ~ lake_elevation_nbr+actual_fish_presence+lake_max_depth'
-
-smod2.fit <- sem(smod2,data=env_div)
-summary(smod2.fit,standardized=TRUE,rsq=T)
-fitMeasures(smod2.fit)
-modindices(smod2.fit)
-
-#quick plot of path analysis
-semPaths(smod2.fit, what='std', layout = "tree3", intercepts = FALSE, residuals = FALSE, 
-         edge.label.cex=1.25, curvePivot = FALSE,  fade=FALSE, rotation = 2)
-
-#Conc: Species richness negatively influenced by  elevation, but positively influenced by lake depth
-
-#########################################################################
-smod3 = ' lake_elevation_nbr~water_temp +air_temp
-          N0~water_temp +air_temp'
-
-smod3.fit <- sem(smod3,data=env_div)
-summary(smod3.fit,standardized=TRUE,rsq=T)
-fitMeasures(smod3.fit)
-modindices(smod3.fit)
-
-#quick plot of path analysis
-semPaths(smod3.fit, what='std', layout = "tree3", intercepts = FALSE, residuals = FALSE, 
-         edge.label.cex=1.25, curvePivot = FALSE,  fade=FALSE, rotation = 2)
-
-#Conc:Elevation effects water and air temp, which have  direct negative effects on species richness
 
 ####################################################################################################################################################################################################################################################################################################
 #Fish by Elevation
@@ -842,10 +797,10 @@ lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "
                                                                                                      "Nofish2noFish","NoFish2fish"))))
 
 
-beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
+beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+#,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
-  facet_grid(~Fish.turnover)+
+  #facet_grid(~Fish.turnover)+
   scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Spatial Dissimilarity")+
   ggtitle("a)") +

@@ -210,7 +210,9 @@ species_mass_data_env_sum%>%
 
 new.fig1b<-species_mass_data_env_sum%>%
   filter(relative_change != "NA")%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=new_change))+
+  filter(relative_change > 0.000001)%>%
+  filter(relative_change < 5)%>%
+  ggplot(aes(x=log(Body_mass_mg+1),y=relative_change))+
   geom_point()+
   ggtitle("b)") +
   geom_smooth(method = "lm")+
@@ -684,10 +686,10 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
                                                                                     "Nofish2noFish","NoFish2fish"))))
 
 
-beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist,colour=Fish.turnover))+
+beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+ #,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
-  facet_grid(~Fish.turnover)+
+  #facet_grid(~Fish.turnover)+
   scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Spatial Dissimilarity")+
   ggtitle("c)") +
