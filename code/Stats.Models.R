@@ -153,10 +153,12 @@ r2(mod3)
 #Beta-diversity
 
 #Lakes Beta
-mod0<-glm(cmtny.dist~Fish.turnover,family = gaussian(link="identity"), data=lake.df.filter)
-mod1<-glm(cmtny.dist~spatial.dist,family = gaussian(link="identity"), data=lake.df.filter)
-mod2<-glm(cmtny.dist~spatial.dist*Fish.turnover,family =gaussian(link="identity"), data=lake.df.filter)
-mod3<-glm(cmtny.dist~1,family =gaussian(link="identity"), data=lake.df.filter)
+analysis<-lake.df.filter%>%
+  filter(cmtny.dist>0, cmtny.dist<1)
+mod0<-betareg(cmtny.dist~Fish.turnover, data=analysis)
+mod1<-betareg(cmtny.dist~spatial.dist, data=analysis)
+mod2<-betareg(cmtny.dist~spatial.dist*Fish.turnover, data=analysis)
+mod3<-betareg(cmtny.dist~1, data=analysis)
 reported.table2 <- bbmle::AICtab(mod0,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
 reported.table2
 r2(mod0)
@@ -166,10 +168,10 @@ r2(mod3)
 
 
 #Streams Beta
-mod0<-glm(cmtny.dist~Fish.turnover,family = gaussian(link="identity"), data=stream.df.filter)
-mod1<-glm(cmtny.dist~spatial.dist,family = gaussian(link="identity"), data=stream.df.filter)
-mod2<-glm(cmtny.dist~spatial.dist*Fish.turnover,family =gaussian(link="identity"), data=stream.df.filter)
-mod3<-glm(cmtny.dist~1,family =gaussian(link="identity"), data=stream.df.filter)
+mod0<-betareg(cmtny.dist~Fish.turnover, data=stream.df.filter)
+mod1<-betareg(cmtny.dist~spatial.dist, data=stream.df.filter)
+mod2<-betareg(cmtny.dist~spatial.dist*Fish.turnover, data=stream.df.filter)
+mod3<-betareg(cmtny.dist~1, data=stream.df.filter)
 reported.table2 <- bbmle::AICtab(mod0,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
 reported.table2
 r2(mod0)

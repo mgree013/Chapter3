@@ -86,7 +86,7 @@ species_mass_data_env_sum<-species_mass_data_env%>%
   summarise(Total_density=sum(abundance))%>%
   pivot_wider(names_from = Taxon,values_from = Total_density)%>%
   filter(Fish !="NA")%>%
-  pivot_longer(cols=Acentrella:Zapada,names_to = "Taxon")
+  pivot_longer(cols=Acari:Zapada,names_to = "Taxon")
 
 no_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(Fish=="No")%>% filter(is.na(value))
@@ -96,6 +96,8 @@ yes_species_mass_data_env_sum<-species_mass_data_env_sum%>%
 
 all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(is.na(value))
+
+write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
 
 #No:Aedes,Alloperla,Allotrichoma,Blephariceridae,Brachycentrus,Callibaetis,Calliperla,Capniidae,Centroptilum,Cheumatopsyche,Chrysops
 #yes: Arctocorisa,Arctopsyche,Atrichopogon,Capniidae,Cenocorixa,Ceratopogon
