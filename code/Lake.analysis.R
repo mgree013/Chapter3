@@ -838,15 +838,22 @@ lake.dist.df<-matrixConvert(lake.dist, colname = c("site1", "site2", "spatial.di
 
 site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
 site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
-lake.df<-lake.bray.df%>%left_join(lake.dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
+net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
+net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
+
+lake.df<-lake.bray.df%>%left_join(lake.dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%
+  left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
 
 lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                                     "Nofish2noFish","NoFish2fish"))))
+                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
 
 
-beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+#,colour=Fish.turnover))+
+beta.stream.a<-lake.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=spatial.dist, y=cmtny.dist))+#,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
   #facet_grid(~Fish.turnover)+
@@ -857,7 +864,9 @@ beta.stream.a<-lake.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+#,colo
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-beta.stream.b<-lake.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
+beta.stream.b<-lake.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Fish Turnover")+

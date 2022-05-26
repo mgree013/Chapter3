@@ -721,15 +721,24 @@ cwm.df<-matrixConvert(cwm.dist, colname = c("site1", "site2", "cwm.dist"))
 
 site.fish.1<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site1="Site")%>%dplyr::rename(fish1="Fish")
 site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%dplyr::rename(fish2="Fish")
-stream.df<-dune.bray.df%>%left_join(dist.df,  by=c("site1", "site2"))%>%left_join(cwm.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")
+net.fish.1<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network1="O.NET")%>%dplyr::rename(site1="Site")
+net.fish.2<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network2="O.NET")%>%dplyr::rename(site2="Site")
+
+
+stream.df<-dune.bray.df%>%left_join(dist.df,  by=c("site1", "site2"))%>%left_join(cwm.df,  by=c("site1", "site2"))%>%
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
 
 stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                              "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                    "Nofish2noFish","NoFish2fish"))))
+                                                                                    "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
+  
 
 
-beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+ #,colour=Fish.turnover))+
+beta.stream.c<-stream.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=spatial.dist, y=cmtny.dist))+ #,colour=Fish.turnover))+
   geom_point()+
   geom_smooth(method="lm")+
   #facet_grid(~Fish.turnover)+
@@ -740,7 +749,9 @@ beta.stream.c<-stream.df.filter%>%ggplot(aes(x=spatial.dist, y=cmtny.dist))+ #,c
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-beta.stream.d<-stream.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
+beta.stream.d<-stream.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
   xlab("Fish Turnover")+
@@ -749,7 +760,9 @@ beta.stream.d<-stream.df.filter%>%ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-stream.df.filter%>%ggplot(aes(x=log(cwm.dist+1), y=cmtny.dist))+
+stream.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=log(cwm.dist+1), y=cmtny.dist))+
   geom_point()+
   geom_smooth(method="lm")+
   facet_grid(~Fish.turnover)+
