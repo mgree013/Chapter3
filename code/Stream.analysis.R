@@ -79,6 +79,16 @@ species_mass_data_env%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+species_mass_data_env%>%
+  filter(Fish !="NA")%>%
+  ggplot(aes(x=Fish,y=log(abundance+1),fill=as.factor(Fish)))+
+  geom_boxplot()+
+  xlab("Fish Presence")+ylab("Log Density")+
+  facet_wrap(~Taxon)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
 ###########
 #Just Select Species that occur in fish and fishless sites
 species_mass_data_env_sum<-species_mass_data_env%>%
@@ -732,7 +742,9 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
                                              "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
-  mutate(Network=if_else(network1== network2,"Same", "Different"))
+  mutate(Network=if_else(network1== network2,"Same", "Different"))%>%
+  filter(Network=="Same")
+  
   
 
 

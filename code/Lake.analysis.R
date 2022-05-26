@@ -848,7 +848,8 @@ lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
                                                                                                      "Nofish2noFish","NoFish2fish"))))%>%
-  mutate(Network=if_else(network1== network2,"Same", "Different"))
+  mutate(Network=if_else(network1== network2,"Same", "Different"))%>%
+  filter(Network=="Same")
 
 
 beta.stream.a<-lake.df.filter%>%
