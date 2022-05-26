@@ -586,6 +586,15 @@ env_abundzzz_new_1%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 env_abundzzz_new_1%>%
+  ggplot(aes(x=Fish,y=occupancy, fill=Fish))+
+  geom_col()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Zooplankton Taxa")+ylab("Proportion of Lakes Occupied")+
+  facet_wrap(~Taxon)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
+env_abundzzz_new_1%>%
   filter(n>8)%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=occupancy, colour=Fish))+
   geom_point()+

@@ -263,10 +263,17 @@ env_abund_body<-species_mass_data_env%>%
   dplyr::select(c(Taxon,Body_mass_mg))
 
 species_mass_data_env_filter_1%>%
-  filter(n>8)%>%
   ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = median),y=occupancy, colour=Fish))+
   geom_point()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+species_mass_data_env_filter_1%>%
+  ggplot(aes(x=Fish,y=occupancy, fill=Fish))+
+  geom_col()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  facet_wrap(~Taxon)+
   xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
