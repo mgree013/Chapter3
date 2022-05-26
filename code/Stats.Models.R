@@ -383,6 +383,14 @@ r2(mod0)
 r2(mod1)
 r2(mod2)
 
+Hesperodiaptomus_shoshone_1<-Hesperodiaptomus_shoshone%>%
+  pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
+  dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
+  replace(is.na(.), 0)%>% 
+  group_by(Taxon,)%>%
+  dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
+                   fish.prop.occupancy=Fish.total.occupancy/n, fishless.prop.occupancy=Fishless.total.occupancy/n)
+
 Holopedium_gibberum<-env_abundzzz_new%>%filter(Taxon=="Holopedium_gibberum")
 mod0<-glm(zoop_density~actual_fish_presence,family = gaussian(link="identity"), data=Holopedium_gibberum)
 mod1<-glm(zoop_density~lake_elevation_nbr,family = gaussian(link="identity"), data=Holopedium_gibberum)

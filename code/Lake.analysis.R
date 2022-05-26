@@ -534,6 +534,16 @@ env_abundz_filtered%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+env_abundzzz_new%>%
+  ggplot(actual_fish_presence, aes(Taxon))+
+  geom_bar()+
+  ggtitle("a)") +
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Zooplankton Log Density + 1")+xlab("Zooplankton Taxa")+
+  facet_wrap(~Taxon)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
 
 
 env_abundzzz_new<-env_abundzzz%>%
@@ -553,7 +563,37 @@ env_abundzzz_new%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+env_abundzzz_new_1<-env_abundzzz_new%>%
+  pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
+  dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
+  replace(is.na(.), 0)%>% 
+  group_by(Taxon)%>%
+  dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
+                   Yes=Fish.total.occupancy/n, No=Fishless.total.occupancy/n)%>%
+  pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
+  left_join(env_abundz_body, by="Taxon")
 
+env_abundz_body<-env_abundz_filter%>%
+  dplyr::select(c(Taxon,Body_mass_ug))
+
+env_abundzzz_new_1%>%
+  filter(n>8)%>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=occupancy, colour=Fish))+
+  geom_point()+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Zooplankton Taxa")+ylab("Proportion of Lakes Occupied")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
+env_abundzzz_new_1%>%
+  filter(n>8)%>%
+  ggplot(aes(x=log(Body_mass_ug+1),y=occupancy, colour=Fish))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Presence")+
+  facet_grid(~Fish)+
+  xlab("Zooplankton Body Size")+ylab("Proportion of Lakes Occupied")+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                      panel.border = element_blank(),panel.background = element_blank())
 
 #Analysis: 
 #remove unwanted columns for analysis due to missing data
