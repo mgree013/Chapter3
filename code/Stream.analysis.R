@@ -107,7 +107,7 @@ yes_species_mass_data_env_sum<-species_mass_data_env_sum%>%
 all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(is.na(value))
 
-write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
+#write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
 
 #No:Aedes,Alloperla,Allotrichoma,Blephariceridae,Brachycentrus,Callibaetis,Calliperla,Capniidae,Centroptilum,Cheumatopsyche,Chrysops
 #yes: Arctocorisa,Arctopsyche,Atrichopogon,Capniidae,Cenocorixa,Ceratopogon
