@@ -107,7 +107,7 @@ all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(is.na(value))%>%
   filter(Taxon !=" Cultus", Taxon != "Sialis", Taxon !="Tabanus", Taxon !="Pleuroceridae", Taxon !="Despaxia", Taxon !="Cenocorixa", Taxon != "Chrysops",
          Taxon !="Capniidae", Taxon !="Rhabdomastix", Taxon != "Hyrda", Taxon !="Monohelea", Taxon != "Forcipomyia", Taxon != "Hemerodromia", Taxon !="Euhirudinea",
-         Taxon != "Cultus", Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
+         Taxon != "Cultus")#, Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
 
 fig1d<-all_species_mass_data_env_sum%>%
   ggplot(aes(x=Fish,y=log(Body_mass_mg+1),fill=as.factor(Fish)))+
