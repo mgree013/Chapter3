@@ -14,7 +14,7 @@ setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
 ###########################################
 #Load Data
 #species<-read.csv(file = "sp.density.update.12.28.19.csv")
-species<-read.csv(file = "sp.density.update.12.28.19_traits.csv",row.names = 1)
+species<-read.csv(file = "sp.density.update.12.28.19_traits.csv")
 summary(species)
 
 traits<-read.csv("data/Full_full_fn_trait.csv")
@@ -32,12 +32,12 @@ str(all_biomass_density)
 ###########################################
 #organize data
 envs<-envs%>%mutate(Euc.dist.lake=log(Euc.dist.lake+1),River.dist.lake=log(River.dist.lake+1),Head.river.dist=log(Head.river.dist+1))
-envs<-envs%>%dplyr::select(c(Site,O.NET))
+#envs<-envs%>%dplyr::select(c(Site,O.NET))
 species_all<-species%>%pivot_longer(-Site, names_to="Taxon", values_to="abundance")%>%filter(abundance>0)
 traits_mass<-traits%>%dplyr::rename(Body_mass_mg=M)%>%dplyr::select(c(Taxon, Body_mass_mg))
 species_mass_data<-left_join(species_all,traits_mass, by="Taxon")
 
-species_mass_data_env<-left_join(species_mass_data,env, by="Site")%>%filter(O.NET != "YOUNG")%>%
+species_mass_data_env<-left_join(species_mass_data,envs, by="Site")%>%filter(O.NET != "YOUNG")%>%
   filter(Site !=	"Outlet.11007.fishless.2003")%>%
   filter(Site !=	"Outlet.11007.fishless.2004")%>%
   filter(Site !=	"Outlet.10487.trt.2003")%>%
@@ -47,7 +47,7 @@ species_mass_data_env<-left_join(species_mass_data,env, by="Site")%>%filter(O.NE
   filter(Site !=	"Outlet.10494.trt.2012")%>%
   filter(Site !=	"	Outlet.Vidette.below.2003")%>%
   filter(Site !=	"	Outlet.Vidette.below.2004")%>%
-  filter(Site !=	"	Outlet.Vidette.below.20012")
+  filter(Site !=	"	Outlet.Vidette.below.20012")%>%filter(Elevation >3200)
 
 ########################################################################################################################
 species_mass_data_env%>%
@@ -103,26 +103,49 @@ yes_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(Fish=="Yes")%>% filter(is.na(value))
 
 all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
-  left_join(traits_mass, by="Taxon")%>%
+  filter(is.na(value))
+
+all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
+  left_join(traits, by="Taxon")%>%
   filter(is.na(value))%>%
   filter(Taxon !=" Cultus", Taxon != "Sialis", Taxon !="Tabanus", Taxon !="Pleuroceridae", Taxon !="Despaxia", Taxon !="Cenocorixa", Taxon != "Chrysops",
          Taxon !="Capniidae", Taxon !="Rhabdomastix", Taxon != "Hyrda", Taxon !="Monohelea", Taxon != "Forcipomyia", Taxon != "Hemerodromia", Taxon !="Euhirudinea",
          Taxon != "Cultus")#, Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
 
 fig1d<-all_species_mass_data_env_sum%>%
-  ggplot(aes(x=Fish,y=log(Body_mass_mg+1),fill=as.factor(Fish)))+
+  ggplot(aes(x=Fish,y=log(M+1),fill=as.factor(Fish)))+
   geom_boxplot()+
   ggtitle("d)") +
-  xlab("Fish Presence")+ylab("Macroinvertebrate Body Mass (mg)")+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  xlab("Species Absent From")+ylab("Macroinvertebrate Body Mass (mg)")+
+  facet_grid(~Feed_prim_abbrev)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("Fishless", "Fish"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())+
   theme(legend.position = c(0.75, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
-dog<-glm(log(Body_mass_mg+1)~Fish,family=gaussian(link="identity"),all_species_mass_data_env_sum)
-summary(dog)
-r2(dog)
-view(all_species_mass_data_env_sum)
+
+
+yes_species_mass_data_env_sum<-species_mass_data_env_sum%>%
+  filter(Fish=="Yes")%>% 
+  na.omit()
+
+no_species_mass_data_env_sum<-species_mass_data_env_sum%>%
+  filter(Fish=="No")%>% 
+  na.omit()
+
+species_mass_data_env_sum_2<-species_mass_data_env_sum%>%
+  na.omit()%>%
+  left_join(traits_mass, by="Taxon")
+
+species_mass_data_env_sum_2%>%
+  ggplot(aes(x=Fish,y=log(Body_mass_mg+1),fill=as.factor(Fish)))+
+  geom_boxplot()+
+  ggtitle("d)") +
+  xlab("Species Absent From")+ylab("Macroinvertebrate Body Mass (mg)")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("Fishless", "Fish"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.75, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 #write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
 
 #No:Aedes,Alloperla,Allotrichoma,Blephariceridae,Brachycentrus,Callibaetis,Calliperla,Capniidae,Centroptilum,Cheumatopsyche,Chrysops
@@ -275,22 +298,20 @@ species_mass_data_env_sum%>%
 
 
 
-species_mass_data_env_filter_1<-species_mass_data_env_filter%>%
+species_mass_data_env_filter_1<-species_mass_data_env%>%
   pivot_wider(names_from = Fish,values_from = abundance)%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
   replace(is.na(.), 0)%>% 
   group_by(Taxon)%>%
-  dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
+  dplyr::summarise(Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),n=Fishless.total.occupancy+Fish.total.occupancy,
                    Yes=Fish.total.occupancy/n, No=Fishless.total.occupancy/n)%>%
   pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
-  left_join(env_abund_body, by="Taxon")
+  left_join(traits_mass, by="Taxon")
 
-env_abund_body<-species_mass_data_env%>%
-  dplyr::select(c(Taxon,Body_mass_mg))
 
-species_mass_data_env_filter_1%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = median),y=occupancy, colour=Fish))+
-  geom_point()+
+new.prop.b<-species_mass_data_env_filter_1%>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = median),y=occupancy, fill=Fish))+
+  geom_col()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
   xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),

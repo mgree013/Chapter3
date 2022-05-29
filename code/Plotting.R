@@ -8,6 +8,8 @@ plot_grid(fig1a,fig1b, nrow=2)
 
 plot_grid(new.fig1a,new.fig1b,fig1c,fig1d, nrow=2)
 
+plot_grid(new.prop.a,new.prop.b,nrow=2)
+
 ###########################################################################
 # Figure 2
 #plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f, nrow=2)

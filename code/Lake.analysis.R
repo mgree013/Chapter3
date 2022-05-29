@@ -597,12 +597,12 @@ env_abundzzz_new_1<-env_abundzzz_new%>%
 env_abundz_body<-env_abundz_filter%>%
   dplyr::select(c(Taxon,Body_mass_ug))
 
-env_abundzzz_new_1%>%
-  filter(n>8)%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=occupancy, colour=Fish))+
-  geom_point()+
+new.prop.a<-env_abundzzz_new_1%>%
+  #filter(n>8)%>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=occupancy, fill=Fish))+
+  geom_col()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
-  xlab("Zooplankton Taxa")+ylab("Proportion of Lakes Occupied")+
+  xlab("Zooplankton Taxa")+ylab("Percentage of Lakes Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
