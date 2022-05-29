@@ -1,12 +1,13 @@
-##This script is for downloading and data exploition inital of SLIP
+#Title: The influence of non-native fish on stream macroinvertebrate and lake zooplankton communities along elevational gradients
+#Authors: Matthew Green, David Herbst, and Kurt Anderson
+
+#Analysis of Stream Communities
+
+
 #Link to EDI data portal: https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2
 #Package ID: edi.577.2 Cataloging System:https://pasta.edirepository.org.
 #Data set title: The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California.
-
-#Matthew Green 
-#16 June 2021 
-
-
+########################################################################################################################################################################
 #Load Packages
 Packages <- c("tidyverse","betareg" ,"ggplot2", "vegan", "reshape2","reshape", "adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
 lapply(Packages, library, character.only = TRUE)

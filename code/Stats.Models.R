@@ -1,3 +1,6 @@
+#Title: The influence of non-native fish on stream macroinvertebrate and lake zooplankton communities along elevational gradients
+#Authors: Matthew Green, David Herbst, and Kurt Anderson
+
 #Stats Code
 
 ######################################################################################################################################################

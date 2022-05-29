@@ -1,8 +1,7 @@
+#Title: The influence of non-native fish on stream macroinvertebrate and lake zooplankton communities along elevational gradients
+#Authors: Matthew Green, David Herbst, and Kurt Anderson
 
-#September 17,2020
-
-#Papers
-#Relationships between body size and abundance in ecology
+#Analysis of Stream Communities
 
 ###########################################
 #Load Packages
