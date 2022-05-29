@@ -509,6 +509,27 @@ new.fig1a<-env_abundz_filter_plot_1%>%
 dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
 summary(dog)
 
+new<-env_abundzzz%>%
+  left_join(av_zoop_body_size_newer, by="Taxon")%>%
+  group_by(Taxon,actual_fish_presence,Body_mass_ug)%>%
+  summarise(Mean_density=mean(log(zoop_density+1)))%>%
+  pivot_wider(names_from=actual_fish_presence,values_from =Mean_density )
+
+env_abundz_filter_bm<-new%>%
+  filter(Taxon=="Alona_spp."| Taxon=="Alonella_excisa" |Taxon=="Ascomorpha_spp."|Taxon=="Asplanchna_spp."|Taxon=="Polyarthra_vulgaris"|Taxon=="Polyphemus_pediculus"|Taxon=="Trichotria_spp.")%>%
+  pivot_longer(cols=Yes:No, names_to = "Fish" )
+
+fig1c<-env_abundz_filter_bm%>%
+  ggplot(aes(x=Fish,y=log(Body_mass_ug+1),fill=Fish))+
+  geom_boxplot()+
+  ggtitle("c)") +
+  #facet_wrap(~actual_fish_presence, scales="free")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  ylab("Zooplankton Log Body Mass (ug)")+xlab("Fish Presence")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank(),,legend.position = "none")
+
+
 env_abundz_filtered<-env_abundzzz%>%
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)#%>%
   filter(Taxon !="Collotheca_spp." ,Taxon !="Eurycercus_lamellatus" ,Taxon !="Lecane_spp." ,Taxon !="Monostyla_spp." ,Taxon !="Polyarthra_vulgaris" ,Taxon !="Simocephalus_serrulatus" )

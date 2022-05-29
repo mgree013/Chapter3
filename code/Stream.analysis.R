@@ -1,6 +1,4 @@
-#Mass Abundance Curves by Site
 
-#Matthew and Katherine
 #September 17,2020
 
 #Papers
@@ -105,8 +103,26 @@ yes_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(Fish=="Yes")%>% filter(is.na(value))
 
 all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
-  filter(is.na(value))
+  left_join(traits_mass, by="Taxon")%>%
+  filter(is.na(value))%>%
+  filter(Taxon !=" Cultus", Taxon != "Sialis", Taxon !="Tabanus", Taxon !="Pleuroceridae", Taxon !="Despaxia", Taxon !="Cenocorixa", Taxon != "Chrysops",
+         Taxon !="Capniidae", Taxon !="Rhabdomastix", Taxon != "Hyrda", Taxon !="Monohelea", Taxon != "Forcipomyia", Taxon != "Hemerodromia", Taxon !="Euhirudinea",
+         Taxon != "Cultus", Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
 
+fig1d<-all_species_mass_data_env_sum%>%
+  ggplot(aes(x=Fish,y=log(Body_mass_mg+1),fill=as.factor(Fish)))+
+  geom_boxplot()+
+  ggtitle("d)") +
+  xlab("Fish Presence")+ylab("Macroinvertebrate Body Mass (mg)")+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.75, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
+dog<-glm(log(Body_mass_mg+1)~Fish,family=gaussian(link="identity"),all_species_mass_data_env_sum)
+summary(dog)
+r2(dog)
+view(all_species_mass_data_env_sum)
 #write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
 
 #No:Aedes,Alloperla,Allotrichoma,Blephariceridae,Brachycentrus,Callibaetis,Calliperla,Capniidae,Centroptilum,Cheumatopsyche,Chrysops
