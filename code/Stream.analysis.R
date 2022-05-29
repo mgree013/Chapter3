@@ -303,7 +303,7 @@ species_mass_data_env_filter_1<-species_mass_data_env%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
   replace(is.na(.), 0)%>% 
   group_by(Taxon)%>%
-  dplyr::summarise(Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),n=Fishless.total.occupancy+Fish.total.occupancy,
+  dplyr::summarise(Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),n=n(),#Fishless.total.occupancy+Fish.total.occupancy,
                    Yes=Fish.total.occupancy/n, No=Fishless.total.occupancy/n)%>%
   pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
   left_join(traits_mass, by="Taxon")
