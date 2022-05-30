@@ -5,7 +5,7 @@
 
 ###########################################
 #Load Packages
-Packages <- c("tidyverse","otuSummary", "ggplot2", "vegan", "reshape2","reshape", "betareg","adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
+Packages <- c("tidyverse","betapart","otuSummary", "ggplot2", "vegan", "reshape2","reshape", "betareg","adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
 lapply(Packages, library, character.only = TRUE)
 
 setwd("~/Dropbox/Manuscipts/Chapter 3/Chapter3/data/")
@@ -732,6 +732,65 @@ diversity.env%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+
   theme(legend.position = c(0.25, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
+############################################################################################################################################
+#Betapart
+dist<-beta.pair.abund(species_beta,index.family="bray")
+dist<-betapart.core.abund(species_beta)
+
+dist<-beta.multi(species_beta,index.family="sorensen")
+dist<-beta.pair(species_beta,index.family="jaccard")
+dist<-beta.pair(dune.rel,index.family="sorensen")
+
+dist<-beta.pair.abund(species_beta,index.family="bray")
+dist.bal<-dist$beta.bray.bal
+dist.gra<-dist$beta.bray.gra
+dist.bray<-dist$beta.bray
+
+dist.bray.df<-matrixConvert(dist.bray, colname = c("site1", "site2", "dist.bray"))
+dist.bal.df<-matrixConvert(dist.bal, colname = c("site1", "site2", "dist.bal"))
+dist.gra.df<-matrixConvert(dist.gra, colname = c("site1", "site2", "dist.gra"))
+
+site.fish.1<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site1="Site")%>%dplyr::rename(fish1="Fish")
+site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%dplyr::rename(fish2="Fish")
+net.fish.1<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network1="O.NET")%>%dplyr::rename(site1="Site")
+net.fish.2<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network2="O.NET")%>%dplyr::rename(site2="Site")
+
+
+stream.df<-dist.bray.df%>%left_join(dist.bal.df,  by=c("site1", "site2"))%>%left_join(dist.gra.df,  by=c("site1", "site2"))%>%
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+
+stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+stream.df.filter%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+stream.df.filter%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=var, y=value,fill=var))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~Fish.turnover)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 ############################################################################################################################################
 #Beta

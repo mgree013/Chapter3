@@ -841,6 +841,70 @@ lake.elev.fish<-env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ####################################################################################################################################################################################################################################################################################################
+#betapart
+lake.dist<-beta.pair.abund(lake.bray,index.family="bray")
+lake.dist.bal<-dist$beta.bray.bal
+lake.dist.gra<-dist$beta.bray.gra
+lake.dist.bray<-dist$beta.bray
+
+lake.dist.bray.df<-matrixConvert(lake.dist.bray, colname = c("site1", "site2", "dist.bray"))
+lake.dist.bal.df<-matrixConvert(lake.dist.bal, colname = c("site1", "site2", "dist.bal"))
+lake.dist.gra.df<-matrixConvert(lake.dist.gra, colname = c("site1", "site2", "dist.gra"))
+
+site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
+site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
+net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
+net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
+
+str(lake.dist.bray.df)
+site.fish.1$site1<-as.factor(site.fish.1$site1)
+site.fish.2$site2<-as.factor(site.fish.2$site2)
+net.fish.1$site1<-as.factor(net.fish.1$site1)
+net.fish.2$site2<-as.factor(net.fish.2$site2)
+
+str(site.fish.1)
+
+lake.df<-lake.dist.bray.df%>%left_join(lake.dist.bal.df,  by=c("site1", "site2"))%>%left_join(lake.dist.gra.df,  by=c("site1", "site2"))%>%
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+
+lake.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+lake.df.filter%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=var, y=value,fill=var))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~Fish.turnover)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+
+
+
+
+
+####################################################################################################################################################################################################################################################################################################
 #Beta
 sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
   filter(HA>=0.5)%>%filter(lake_max_depth>3)
