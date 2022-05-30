@@ -900,6 +900,8 @@ beta.a<-lake.df.filter%>%
 lake.rel_new<-lake.rel%>%mutate()
 
 lake.rel[lake.rel > 0] <- 1
+lake.dist<-beta.multi(lake.rel,index.family="sorensen")
+
 
 lake.dist<-beta.pair(lake.rel,index.family="sorensen")
 lake.dist.beta.sim<-lake.dist$beta.sim
@@ -973,6 +975,8 @@ lake.df.filter%>%
   ylab("Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
 
 ####################################################################################################################################################################################################################################################################################################
 #Beta

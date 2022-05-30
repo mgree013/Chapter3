@@ -786,9 +786,11 @@ beta.b<-stream.df.filter%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 #beta presence/abs
-species_beta[species_beta > 0] <- 1
+dune.rel[dune.rel > 0] <- 1
+dist<-beta.multi(dune.rel,index.family="sorensen")
 
-dist<-beta.pair(species_beta,index.family="sorensen")
+
+dist<-beta.pair(dune.rel,index.family="sorensen")
 dist.sim<-dist$beta.sim
 dist.sne<-dist$beta.sne
 dist.sor<-dist$beta.sor
@@ -811,6 +813,10 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
                                                                                                      "Nofish2noFish","NoFish2fish"))))%>%
   mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+stream.df.filter_mod<-stream.df.filter%>%pivot_longer(cols=dist.sim:dist.sor, names_to="beta_div_comp", values_to ="beta_value" )
+stream.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
+
 
 stream.df.filter%>%
   gather(dist.sim,dist.sne,dist.sor,key = "var", value = "value")%>% 

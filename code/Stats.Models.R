@@ -184,12 +184,45 @@ r2(mod3)
 
 #beta turn
 
-lake.df.filter_mod_1<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="beta.sor")
-
+lake.df.filter_mod_1<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.sor")
 mod<-betareg(beta_value~beta_div_comp,lake.df.filter_mod_1)
+null<-betareg(beta_value~1, data=lake.df.filter_mod_1)
+reported.table2 <- bbmle::AICtab(mod,null,weights = TRUE, sort = FALSE)
+reported.table2
 r2(mod)
 summary(mod)
-TukeyHSD(mod)
+
+stream.df.filter_mod_1<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.sor")
+mod<-betareg(beta_value~beta_div_comp,stream.df.filter_mod_1)
+null<-betareg(beta_value~1, data=stream.df.filter_mod_1)
+reported.table2 <- bbmle::AICtab(mod,null,weights = TRUE, sort = FALSE)
+reported.table2
+r2(mod)
+summary(mod)
+
+stream.df.filter_mod_2<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.sor")%>%add_column(Ecosystem="Stream")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
+lake.df.filter_mod_2<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.sor")%>%add_column(Ecosystem="Lake")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
+
+cbnd<-stream.df.filter_mod_2%>%full_join(lake.df.filter_mod_2, by=c("Ecosystem","beta_value","beta_div_comp"))
+str(cbnd)
+mod<-betareg(beta_value~Ecosystem,cbnd)
+null<-betareg(beta_value~1, data=cbnd)
+reported.table2 <- bbmle::AICtab(mod,null,weights = TRUE, sort = FALSE)
+reported.table2
+r2(mod)
+summary(mod)
+
+cbnd%>%
+  ggplot(aes(x=Ecosystem, y=beta_value,fill=Ecosystem))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Turnover and Nestedness Components")+
+  ggtitle("b)") +
+  ylab("Macroinvertebrate Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
 ######################################################################################################################################################
 #Species Responses
 
