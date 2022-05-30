@@ -956,7 +956,7 @@ beta.a<-lake.df.filter_mod%>%
   scale_x_discrete(labels=c(expression(beta[sim]),expression(beta[sne]),expression(beta[sor])))+
   xlab("Turnover and Nestedness Components")+
   ggtitle("a)") +
-  ylab("Beta Diversity")+
+  ylab("Zooplankton Beta Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 

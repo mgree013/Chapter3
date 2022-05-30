@@ -182,6 +182,14 @@ r2(mod1)
 r2(mod2)
 r2(mod3)
 
+#beta turn
+
+lake.df.filter_mod_1<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="beta.sor")
+
+mod<-betareg(beta_value~beta_div_comp,lake.df.filter_mod_1)
+r2(mod)
+summary(mod)
+TukeyHSD(mod)
 ######################################################################################################################################################
 #Species Responses
 
