@@ -842,10 +842,10 @@ lake.elev.fish<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ####################################################################################################################################################################################################################################################################################################
 #betapart
-lake.dist<-beta.pair.abund(lake.bray,index.family="bray")
-lake.dist.bal<-dist$beta.bray.bal
-lake.dist.gra<-dist$beta.bray.gra
-lake.dist.bray<-dist$beta.bray
+lake.dist<-beta.pair.abund(lake.rel,index.family="bray")
+lake.dist.bal<-lake.dist$beta.bray.bal
+lake.dist.gra<-lake.dist$beta.bray.gra
+lake.dist.bray<-lake.dist$beta.bray
 
 lake.dist.bray.df<-matrixConvert(lake.dist.bray, colname = c("site1", "site2", "dist.bray"))
 lake.dist.bal.df<-matrixConvert(lake.dist.bal, colname = c("site1", "site2", "dist.bal"))
@@ -857,17 +857,14 @@ net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>
 net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
 
 str(lake.dist.bray.df)
-site.fish.1$site1<-as.factor(site.fish.1$site1)
-site.fish.2$site2<-as.factor(site.fish.2$site2)
-net.fish.1$site1<-as.factor(net.fish.1$site1)
-net.fish.2$site2<-as.factor(net.fish.2$site2)
+
 
 str(site.fish.1)
 
 lake.df<-lake.dist.bray.df%>%left_join(lake.dist.bal.df,  by=c("site1", "site2"))%>%left_join(lake.dist.gra.df,  by=c("site1", "site2"))%>%
   left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
 
-lake.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
                                                                                                      "Nofish2noFish","NoFish2fish"))))%>%
@@ -886,7 +883,7 @@ lake.df.filter%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-lake.df.filter%>%
+beta.a<-lake.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
   ggplot(aes(x=var, y=value,fill=var))+
   geom_boxplot()+
@@ -895,22 +892,94 @@ lake.df.filter%>%
   xlab("Spatial Dissimilarity")+
   ggtitle("c)") +
   ylab("Beta Diversity")+
-  facet_grid(~Fish.turnover)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 
+#betapart presence/absence
+lake.rel_new<-lake.rel%>%mutate()
+
+lake.rel[lake.rel > 0] <- 1
+
+lake.dist<-beta.pair(lake.rel,index.family="sorensen")
+lake.dist.beta.sim<-lake.dist$beta.sim
+lake.dist.beta.sne<-lake.dist$beta.sne
+lake.dist.beta.sor<-lake.dist$beta.sor
+
+env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
+lake.dist<-vegdist(env_beta_dist, "euclidean")
+
+lake.dist.sim.df<-matrixConvert(lake.dist.beta.sim, colname = c("site1", "site2", "dist.sim"))
+lake.dist.sne.df<-matrixConvert(lake.dist.beta.sne, colname = c("site1", "site2", "dist.sne"))
+lake.dist.sor.df<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.sor"))
+lake.dist.space<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.space"))
+
+site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
+site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
+net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
+net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
+
+str(lake.dist.sor.df)
 
 
+str(lake.dist.space)
 
+lake.df<-lake.dist.sim.df%>%left_join(lake.dist.sne.df,  by=c("site1", "site2"))%>%left_join(lake.dist.sor.df,  by=c("site1", "site2"))%>%left_join(lake.dist.space,  by=c("site1", "site2"))%>%
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+
+lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                                       "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                                           "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                                 "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+lake.df.filter%>%
+  gather(dist.sim ,dist.sne,dist.sor,key = "var", value = "value")%>% 
+  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter_mod<-lake.df.filter%>%pivot_longer(cols=dist.sim:dist.sor, names_to="beta_div_comp", values_to ="beta_value" )
+beta.a<-lake.df.filter_mod%>%
+  ggplot(aes(x=beta_div_comp, y=beta_value,fill=beta_div_comp))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  #scale_x_discrete(labels=c("dist.sim" = "Bsim", "dist.sne" = "Bsne","dist.sor" = "Bsor"))+
+  scale_x_discrete(labels=c(expression(beta[sim]),expression(beta[sne]),expression(beta[sor])))+
+  xlab("Turnover and Nestedness Components")+
+  ggtitle("a)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%
+  #filter(Network=="Same")%>%
+  #gather(dist.sim ,dist.sne,dist.sor,key = "var", value = "value")%>% 
+  ggplot(aes(x=dist.sim, y=dist.sne))+#,colour=Fish.turnover))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  #facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("a)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 ####################################################################################################################################################################################################################################################################################################
 #Beta
 sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
   filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
-specie<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))
-species<-specie
+species<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))
 lake.rel<-decostand(species,"total") #standardize community data
 lake.bray<-vegdist(lake.rel) 
 

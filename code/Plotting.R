@@ -92,7 +92,7 @@ plot_grid(fig6a,fig6b,nrow=1)
 # Figure 7
 plot_grid(beta.stream.a,beta.stream.b,beta.stream.c,beta.stream.d,nrow=2)
 
-
+plot_grid(beta.a,beta.b,nrow=1)
 ###########################################################################
 ###########################################################################
 #Supplemental Figure S1

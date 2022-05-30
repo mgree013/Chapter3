@@ -735,12 +735,6 @@ diversity.env%>%
 
 ############################################################################################################################################
 #Betapart
-dist<-beta.pair.abund(species_beta,index.family="bray")
-dist<-betapart.core.abund(species_beta)
-
-dist<-beta.multi(species_beta,index.family="sorensen")
-dist<-beta.pair(species_beta,index.family="jaccard")
-dist<-beta.pair(dune.rel,index.family="sorensen")
 
 dist<-beta.pair.abund(species_beta,index.family="bray")
 dist.bal<-dist$beta.bray.bal
@@ -779,7 +773,7 @@ stream.df.filter%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-stream.df.filter%>%
+beta.b<-stream.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
   ggplot(aes(x=var, y=value,fill=var))+
   geom_boxplot()+
@@ -788,10 +782,61 @@ stream.df.filter%>%
   xlab("Spatial Dissimilarity")+
   ggtitle("c)") +
   ylab("Beta Diversity")+
-  facet_grid(~Fish.turnover)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
+#beta presence/abs
+species_beta[species_beta > 0] <- 1
+
+dist<-beta.pair(species_beta,index.family="sorensen")
+dist.sim<-dist$beta.sim
+dist.sne<-dist$beta.sne
+dist.sor<-dist$beta.sor
+
+dist.sim.df<-matrixConvert(dist.sim, colname = c("site1", "site2", "dist.sim"))
+dist.sne.df<-matrixConvert(dist.sne, colname = c("site1", "site2", "dist.sne"))
+dist.sor.df<-matrixConvert(dist.sor, colname = c("site1", "site2", "dist.sor"))
+
+site.fish.1<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site1="Site")%>%dplyr::rename(fish1="Fish")
+site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%dplyr::rename(fish2="Fish")
+net.fish.1<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network1="O.NET")%>%dplyr::rename(site1="Site")
+net.fish.2<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network2="O.NET")%>%dplyr::rename(site2="Site")
+
+
+stream.df<-dist.sim.df%>%left_join(dist.sne.df,  by=c("site1", "site2"))%>%left_join(dist.sor.df,  by=c("site1", "site2"))%>%
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+
+stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
+                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
+                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
+                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
+  mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+stream.df.filter%>%
+  gather(dist.sim,dist.sne,dist.sor,key = "var", value = "value")%>% 
+  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+beta.b<-stream.df.filter%>%
+  gather(dist.sim,dist.sne,dist.sor,key = "var", value = "value")%>% 
+  ggplot(aes(x=var, y=value,fill=var))+
+  geom_boxplot()+
+  #facet_grid(~Fish.turnover)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
+  scale_x_discrete(labels=c(expression(beta[sim]),expression(beta[sne]),expression(beta[sor])))+
+  xlab("Turnover and Nestedness Components")+
+  ggtitle("b)") +
+  ylab("Beta Diversity")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ############################################################################################################################################
 #Beta
 species<-read.csv(file = "data/sp.density.update.12.28.19_traits.csv")
