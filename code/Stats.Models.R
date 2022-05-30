@@ -184,15 +184,15 @@ r2(mod3)
 
 #beta turn
 
-lake.df.filter_mod_1<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.sor")
+lake.df.filter_mod_1<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.bray")
 mod<-betareg(beta_value~beta_div_comp,lake.df.filter_mod_1)
 null<-betareg(beta_value~1, data=lake.df.filter_mod_1)
 reported.table2 <- bbmle::AICtab(mod,null,weights = TRUE, sort = FALSE)
 reported.table2
 r2(mod)
-summary(mod)
+#summary(mod)
 
-stream.df.filter_mod_1<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.sor")
+stream.df.filter_mod_1<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp !="dist.bray")
 mod<-betareg(beta_value~beta_div_comp,stream.df.filter_mod_1)
 null<-betareg(beta_value~1, data=stream.df.filter_mod_1)
 reported.table2 <- bbmle::AICtab(mod,null,weights = TRUE, sort = FALSE)

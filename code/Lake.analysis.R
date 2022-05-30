@@ -442,12 +442,12 @@ env_abundzzz%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 env_abundzzz%>%
-  ggplot(aes(x=Taxon,y=log(zoop_density+1),fill=actual_fish_presence))+
-  geom_boxplot()+
+  ggplot(aes(x=lake_elevation_nbr,y=log(zoop_density+1),fill=actual_fish_presence))+
+  geom_point()+geom_smooth()+
   facet_wrap(~Taxon, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   ylab("Zooplankton Density")+xlab("Zooplankton Species")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 ##########
@@ -841,8 +841,21 @@ lake.elev.fish<-env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ####################################################################################################################################################################################################################################################################################################
+library(betapart)
+
+data(ceram.s)
+
+data(ceram.n)
+
+
 #betapart
-lake.dist<-beta.pair.abund(lake.rel,index.family="bray")
+sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
+  filter(HA>=0.5)%>%filter(lake_max_depth>3)
+
+species<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))#%>%dplyr::select(-c(nauplii,Cyclopoida))
+lake.rel<-decostand(species,"total")
+
+lake.dist<-beta.pair.abund(species,index.family="bray")
 lake.dist.bal<-lake.dist$beta.bray.bal
 lake.dist.gra<-lake.dist$beta.bray.gra
 lake.dist.bray<-lake.dist$beta.bray
@@ -856,9 +869,7 @@ site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence)
 net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
 net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
 
-str(lake.dist.bray.df)
-
-
+str(lake.dist)
 str(site.fish.1)
 
 lake.df<-lake.dist.bray.df%>%left_join(lake.dist.bal.df,  by=c("site1", "site2"))%>%left_join(lake.dist.gra.df,  by=c("site1", "site2"))%>%
@@ -869,6 +880,8 @@ lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "
                                                                                "Fish2nofish",if_else(fish1== "No" & fish2== "No",
                                                                                                      "Nofish2noFish","NoFish2fish"))))%>%
   mutate(Network=if_else(network1== network2,"Same", "Different"))
+
+lake.df.filter_mod<-lake.df.filter%>%pivot_longer(cols=dist.bray:dist.gra, names_to="beta_div_comp", values_to ="beta_value" )
 
 lake.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
@@ -889,9 +902,10 @@ beta.a<-lake.df.filter%>%
   geom_boxplot()+
   #facet_grid(~Fish.turnover)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
+  scale_x_discrete(labels=c(expression(beta[bal]),expression(beta[bray]),expression(beta[gra])))+
+  xlab("Turnover and Nestedness Components")+
+  ggtitle("a)") +
+  labs(y=(("Zooplankton \u03B2-diversity")))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 

@@ -735,6 +735,9 @@ diversity.env%>%
 
 ############################################################################################################################################
 #Betapart
+species_beta<-new_species_envs%>%dplyr::select(c(Site, Acari:Zapada))%>%column_to_rownames("Site")
+env_beta<-new_species_envs%>%dplyr::select(c(Site:Fish))
+dune.rel<-decostand(species_beta,"total")
 
 dist<-beta.pair.abund(species_beta,index.family="bray")
 dist.bal<-dist$beta.bray.bal
@@ -760,6 +763,9 @@ stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2
                                                                                                      "Nofish2noFish","NoFish2fish"))))%>%
   mutate(Network=if_else(network1== network2,"Same", "Different"))
 
+stream.df.filter_mod<-stream.df.filter%>%pivot_longer(cols=dist.bray:dist.gra, names_to="beta_div_comp", values_to ="beta_value" )
+stream.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
+
 stream.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
   ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
@@ -777,11 +783,12 @@ beta.b<-stream.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
   ggplot(aes(x=var, y=value,fill=var))+
   geom_boxplot()+
-  #facet_grid(~Fish.turnover)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
+  scale_x_discrete(labels=c(expression(beta[bal]),expression(beta[bray]),expression(beta[gra])))+
+  xlab("Turnover and Nestedness Components")+
+  ggtitle("b)") +
+ # ylab("Macroinvertebrate Beta Diversity")+
+  labs(y=(("Macroinvertebrate \u03B2-diversity")))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
