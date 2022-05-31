@@ -504,7 +504,7 @@ new.fig1a<-env_abundz_filter_plot_1%>%
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   ggtitle("a)") +
-  ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Body Mass")+
+  ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Log Body Mass (ug)")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
@@ -526,7 +526,8 @@ fig1c<-env_abundz_filter_bm%>%
   ggtitle("c)") +
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  ylab("Zooplankton Log Body Mass (ug)")+xlab("Fish Presence")+
+  scale_x_discrete(labels=c("Fishless", "Fish"))+
+  ylab("Zooplankton Log Body Mass (ug)")+xlab("Species Absent From")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank(),,legend.position = "none")
 

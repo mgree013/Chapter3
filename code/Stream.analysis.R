@@ -120,9 +120,10 @@ fig1d<-all_species_mass_data_env_sum%>%
   xlab("Species Absent From")+ylab("Macroinvertebrate Body Mass (mg)")+
   #facet_grid(~Feed_prim_abbrev)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("Fishless", "Fish"))+
+  scale_x_discrete(labels=c("Fishless", "Fish"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())+
-  theme(legend.position = c(0.75, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+  theme(legend.position = c(0.5, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 
 
@@ -241,7 +242,7 @@ new.fig1b<-species_mass_data_env_sum%>%
   ggtitle("b)") +
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
-  ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Body Mass")+
+  ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Log Body Mass (mg)")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
