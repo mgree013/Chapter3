@@ -200,8 +200,8 @@ reported.table2
 r2(mod)
 summary(mod)
 
-stream.df.filter_mod_2<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.sor")%>%add_column(Ecosystem="Stream")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
-lake.df.filter_mod_2<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.sor")%>%add_column(Ecosystem="Lake")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
+stream.df.filter_mod_2<-stream.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.bray")%>%add_column(Ecosystem="Stream")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
+lake.df.filter_mod_2<-lake.df.filter_mod%>%filter(beta_value>0, beta_value<1)%>%filter(beta_div_comp =="dist.bray")%>%add_column(Ecosystem="Lake")%>%dplyr::select(c(Ecosystem, beta_value, beta_div_comp))
 
 cbnd<-stream.df.filter_mod_2%>%full_join(lake.df.filter_mod_2, by=c("Ecosystem","beta_value","beta_div_comp"))
 str(cbnd)

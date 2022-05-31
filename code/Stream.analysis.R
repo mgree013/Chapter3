@@ -109,14 +109,16 @@ all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
   filter(is.na(value))%>%
   filter(Taxon !=" Cultus", Taxon != "Sialis", Taxon !="Tabanus", Taxon !="Pleuroceridae", Taxon !="Despaxia", Taxon !="Cenocorixa", Taxon != "Chrysops",
          Taxon !="Capniidae", Taxon !="Rhabdomastix", Taxon != "Hyrda", Taxon !="Monohelea", Taxon != "Forcipomyia", Taxon != "Hemerodromia", Taxon !="Euhirudinea",
-         Taxon != "Cultus")#, Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
+         Taxon != "Cultus", Taxon !="Wormaldia")#, Taxon !="Arctopsyche", Taxon !="Chyranda", Taxon !="Neothremma")
+
+#write.csv(all_species_mass_data_env_sum,"all_species_mass_data_env_sum.csv")
 
 fig1d<-all_species_mass_data_env_sum%>%
   ggplot(aes(x=Fish,y=log(M+1),fill=as.factor(Fish)))+
   geom_boxplot()+
   ggtitle("d)") +
   xlab("Species Absent From")+ylab("Macroinvertebrate Body Mass (mg)")+
-  facet_grid(~Feed_prim_abbrev)+
+  #facet_grid(~Feed_prim_abbrev)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("Fishless", "Fish"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())+
@@ -206,34 +208,6 @@ species_mass_data_env_filter%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
 
-model1<-glm(log(abundance+1)~Fish,family=gaussian(link="identity"),species_mass_data_env_filter)
-model2<-glm(log(abundance+1)~Elevation,family=gaussian(link="identity"),species_mass_data_env_filter)
-model3<-glm(log(abundance+1)~Body_mass_mg,family=gaussian(link="identity"),species_mass_data_env_filter)
-model4<-glm(log(abundance+1)~Fish*Elevation,family=gaussian(link="identity"),species_mass_data_env_filter)
-model5<-glm(log(abundance+1)~Fish*Body_mass_mg,family=gaussian(link="identity"),species_mass_data_env_filter)
-model6<-glm(log(abundance+1)~Elevation*Body_mass_mg,family=gaussian(link="identity"),species_mass_data_env_filter)
-model7<-glm(log(abundance+1)~Fish*Elevation*Body_mass_mg,family=gaussian(link="identity"),species_mass_data_env_filter)
-model8<-glm(log(abundance+1)~1,family=gaussian(link="identity"),species_mass_data_env_filter)
-reported.table2 <- bbmle::AICtab(model1,model2,model3,model4,model5,model6,model7,model8,weights = TRUE, sort = FALSE)
-reported.table2
-r2(model7)
-pseudoR0 <- ((model7$null.deviance-model7$deviance)/model7$null.deviance)
-pseudoR0
-
-#Doroneuria
-species_mass_data_env_filter_Doroneuria<-species_mass_data_env_filter%>%
-  filter(Taxon=="Doroneuria")
-
-model1<-glm(log(abundance+1)~Fish,family=gaussian(link="identity"),species_mass_data_env_filter_Doroneuria)
-model2<-glm(log(abundance+1)~Elevation,family=gaussian(link="identity"),species_mass_data_env_filter_Doroneuria)
-model4<-glm(log(abundance+1)~Fish*Elevation,family=gaussian(link="identity"),species_mass_data_env_filter_Doroneuria)
-model8<-glm(log(abundance+1)~1,family=gaussian(link="identity"),species_mass_data_env_filter_Doroneuria)
-reported.table2 <- bbmle::AICtab(model1,model2,model4,model8,weights = TRUE, sort = FALSE)
-reported.table2
-r2(model1)
-
-pseudoR0 <- ((model1$null.deviance-model1$deviance)/model1$null.deviance)
-pseudoR0
 
 
 #Change in density by body size
@@ -738,6 +712,9 @@ diversity.env%>%
 species_beta<-new_species_envs%>%dplyr::select(c(Site, Acari:Zapada))%>%column_to_rownames("Site")
 env_beta<-new_species_envs%>%dplyr::select(c(Site:Fish))
 dune.rel<-decostand(species_beta,"total")
+
+
+sum.dist<-beta.multi.abund(species_beta,index.family="bray")
 
 dist<-beta.pair.abund(species_beta,index.family="bray")
 dist.bal<-dist$beta.bray.bal

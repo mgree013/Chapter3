@@ -855,6 +855,8 @@ sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevat
 species<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))#%>%dplyr::select(-c(nauplii,Cyclopoida))
 lake.rel<-decostand(species,"total")
 
+lake.dist<-beta.multi.abund(species,index.family="bray")
+
 lake.dist<-beta.pair.abund(species,index.family="bray")
 lake.dist.bal<-lake.dist$beta.bray.bal
 lake.dist.gra<-lake.dist$beta.bray.gra
@@ -882,6 +884,8 @@ lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "
   mutate(Network=if_else(network1== network2,"Same", "Different"))
 
 lake.df.filter_mod<-lake.df.filter%>%pivot_longer(cols=dist.bray:dist.gra, names_to="beta_div_comp", values_to ="beta_value" )
+lake.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
+
 
 lake.df.filter%>%
   gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
