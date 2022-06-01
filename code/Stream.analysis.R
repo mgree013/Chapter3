@@ -271,7 +271,25 @@ species_mass_data_env_sum%>%
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
 
+#All sites Occupancy
+species_mass_data_env_filter_2<-species_mass_data_env%>%
+  pivot_wider(names_from = Fish,values_from = abundance)%>%
+  dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
+  replace(is.na(.), 0)%>% 
+  group_by(Taxon)%>%
+  dplyr::summarise(Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),n=n(),#Fishless.total.occupancy+Fish.total.occupancy,
+                   Yes=Fish.total.occupancy/63, No=Fishless.total.occupancy/63)%>%
+  pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
+  left_join(traits_mass, by="Taxon")
 
+
+new.prop.b2<-species_mass_data_env_filter_2%>%
+  ggplot(aes(x=reorder(Taxon, +Body_mass_mg),y=occupancy, fill=Fish, group=Fish))+
+  geom_col( size = 0.5, position='dodge')+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
 species_mass_data_env_filter_1<-species_mass_data_env%>%
   pivot_wider(names_from = Fish,values_from = abundance)%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
@@ -284,31 +302,12 @@ species_mass_data_env_filter_1<-species_mass_data_env%>%
 
 
 new.prop.b<-species_mass_data_env_filter_1%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_mg, FUN = median),y=occupancy, fill=Fish))+
-  geom_col()+
+  ggplot(aes(x=reorder(Taxon, +Body_mass_mg),y=occupancy, fill=Fish, group=Fish))+
+  geom_col( size = 0.5, position='dodge')+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
   xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
-species_mass_data_env_filter_1%>%
-  ggplot(aes(x=Fish,y=occupancy, fill=Fish))+
-  geom_col()+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
-  facet_wrap(~Taxon)+
-  xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
-
-species_mass_data_env_filter_1%>%
-  #filter(n>8)%>%
-  ggplot(aes(x=log(Body_mass_mg+1),y=occupancy, colour=Fish))+
-  geom_point()+
-  geom_smooth(method="lm")+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Presence")+
-  facet_grid(~Fish)+
-  xlab("Macroinvertebrate Body Size")+ylab("Proportion of Stream Sites Occupied")+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                           panel.border = element_blank(),panel.background = element_blank())
-
 ############################################################################################################################################
 #Diversity
 species<-read.csv(file = "sp.density.update.12.28.19_traits.csv", row.names = 1)

@@ -613,9 +613,8 @@ env_abundzzz_new_1<-env_abundzzz_new%>%
 
 
 new.prop.a<-env_abundzzz_new_1%>%
-  #filter(n>8)%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=occupancy, fill=Fish))+
-  geom_col()+
+  ggplot(aes(x=reorder(Taxon, +Body_mass_ug),y=occupancy, fill=Fish, group=Fish))+
+  geom_col( size = 0.5, position='dodge')+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
   xlab("Zooplankton Taxa")+ylab("Percentage of Lakes Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -641,14 +640,14 @@ env_abundzzz_new_1%>%
                                                                       panel.border = element_blank(),panel.background = element_blank())
 
 
-#1) Occupancy of all lakes
+#2) Occupancy of all lakes
 unique(env_abundzzz_new$lake_id)
 
-env_abundzzz_new_1<-env_abundzzz_new%>%
+env_abundzzz_new_2<-env_abundzzz_new%>%
   pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
   replace(is.na(.), 0)%>% 
-  add_column(Nmbr.Lakes=205)%>%
+  add_column(Nmbr.Lakes=602)%>%
   group_by(Taxon)%>%
   dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
                    Yes=Fish.total.occupancy/Nmbr.Lakes, No=Fishless.total.occupancy/Nmbr.Lakes)%>%
@@ -657,7 +656,7 @@ env_abundzzz_new_1<-env_abundzzz_new%>%
 
 
 
-env_abundzzz_new_1%>%
+new.prop.a2<-env_abundzzz_new_2%>%
   ggplot(aes(x=reorder(Taxon, +Body_mass_ug),y=occupancy, fill=Fish, group=Fish))+
   geom_col( size = 0.5, position='dodge')+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
@@ -863,10 +862,6 @@ anova(mod)
 print(mod)
 permutest(mod)
 boxplot(mod)
-#adonis2(species ~ sp_abund_env$lake_elevation_nbr+sp_abund_env$actual_fish_presence+sp_abund_env$lake_drainage_name, permutations = 999, method = "bray")
-
-#The Drainage Basins explain most of the variation (19%), then elevation (7%), and then fish presence (1%)...still a lot fo unexplained variation
-#fish presence has larger hull indicating more community combinations, potentially confounded by elevation
 
 
 ####################################################################################################################################################################################################################################################################################################
@@ -884,9 +879,6 @@ lake.elev.fish<-env_div%>%
 ####################################################################################################################################################################################################################################################################################################
 library(betapart)
 
-data(ceram.s)
-
-data(ceram.n)
 
 
 #betapart

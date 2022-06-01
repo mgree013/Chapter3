@@ -4,6 +4,7 @@
 #plotting Code
 
 library(cowplot)
+library(tidyverse)
 
 ###########################################################################
 # Figure 1
@@ -12,6 +13,8 @@ plot_grid(fig1a,fig1b, nrow=2)
 plot_grid(new.fig1a,new.fig1b,fig1c,fig1d, nrow=2)
 
 plot_grid(new.prop.a,new.prop.b,nrow=2)
+
+plot_grid(new.prop.a2,new.prop.b2,nrow=2)
 
 ###########################################################################
 # Figure 2
