@@ -255,17 +255,18 @@ dog<-glm(log(Body_mass_mg+1)~Fish,family=gaussian(link="identity"),all_species_m
 summary(dog)
 r2(dog)
 
-mod0<-glm(log(Body_mass_mg+1)~Fish,family=gaussian(link="identity"),all_species_mass_data_env_sum)
-modnull<-glm(log(Body_mass_mg+1)~1,family=gaussian(link="identity"),all_species_mass_data_env_sum)
+mod0<-glm(log(M+1)~Fish,family=gaussian(link="identity"),all_species_mass_data_env_sum)
+modnull<-glm(log(M+1)~1,family=gaussian(link="identity"),all_species_mass_data_env_sum)
 reported.table2 <- bbmle::AICtab(mod0,modnull,weights = TRUE, sort = FALSE)
 reported.table2
+r2(mod0)
 
 
 mod0<-glm(log(Body_mass_ug+1)~Fish,family=gaussian(link="identity"),env_abundz_filter_bm)
 modnull<-glm(log(Body_mass_ug+1)~1,family=gaussian(link="identity"),env_abundz_filter_bm)
 reported.table2 <- bbmle::AICtab(mod0,modnull,weights = TRUE, sort = FALSE)
 reported.table2
-
+r2(mod0)
 ######################################################################################################################################################
 #Supplemental
 

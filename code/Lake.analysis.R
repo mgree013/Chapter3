@@ -573,7 +573,14 @@ env_abundzzz_new<-env_abundzzz%>%
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)%>%
   dplyr::select(c(lake_id,survey_date,Taxon,zoop_density,actual_fish_presence,lake_elevation_nbr,Mean_body_size_mm))%>%
   filter(Taxon !="nauplii")
-  
+
+a<-env_cwm%>% 
+  ungroup()%>%
+  dplyr::select(c(lake_id))%>%
+  dplyr::distinct(lake_id)%>%
+  #group_by(lake_id) %>%
+  summarise(no_rows = length(lake_id))
+
 
 env_abundzzz_new%>%
   ggplot(aes(x=actual_fish_presence,y=log(zoop_density+1),fill=actual_fish_presence))+
@@ -586,6 +593,13 @@ env_abundzzz_new%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
+##########################################################################################
+#Occupancy 
+
+env_abundz_body<-env_abundz_filter%>%
+  dplyr::select(c(Taxon,Body_mass_ug))
+
+#1) Occupnacy of Lakes its found in
 env_abundzzz_new_1<-env_abundzzz_new%>%
   pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
@@ -596,8 +610,7 @@ env_abundzzz_new_1<-env_abundzzz_new%>%
   pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
   left_join(env_abundz_body, by="Taxon")
 
-env_abundz_body<-env_abundz_filter%>%
-  dplyr::select(c(Taxon,Body_mass_ug))
+
 
 new.prop.a<-env_abundzzz_new_1%>%
   #filter(n>8)%>%
@@ -627,6 +640,31 @@ env_abundzzz_new_1%>%
   xlab("Zooplankton Body Size")+ylab("Proportion of Lakes Occupied")+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                       panel.border = element_blank(),panel.background = element_blank())
 
+
+#1) Occupancy of all lakes
+unique(env_abundzzz_new$lake_id)
+
+env_abundzzz_new_1<-env_abundzzz_new%>%
+  pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
+  dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
+  replace(is.na(.), 0)%>% 
+  add_column(Nmbr.Lakes=205)%>%
+  group_by(Taxon)%>%
+  dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
+                   Yes=Fish.total.occupancy/Nmbr.Lakes, No=Fishless.total.occupancy/Nmbr.Lakes)%>%
+  pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
+  left_join(env_abundz_body, by="Taxon")
+
+
+
+env_abundzzz_new_1%>%
+  ggplot(aes(x=reorder(Taxon, +Body_mass_ug),y=occupancy, fill=Fish, group=Fish))+
+  geom_col( size = 0.5, position='dodge')+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Zooplankton Taxa")+ylab("Percentage of Lakes Occupied")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+##########################################################################################
 #Analysis: 
 #remove unwanted columns for analysis due to missing data
 env_abundzz<-env_abundz%>%
@@ -650,15 +688,6 @@ regional.names<-env_abundzz %>%
                 Ascomorpha_spp.,Scapholeberis_mucronata,Diaphanosoma_brachyurum, Chaoborus_trivitattus,Polyphemus_pediculus, Daphnia_pulex_pulicaria,
                 Eurycercus_lamellatus)
 
-for(i in 1:(ncol(regional.names))){
-  columns <- names(env_abundzz[i])
-  anovaresult<- summary(aov(env_abundzz[,i]~actual_fish_presence,data=env_abundzz))
-  
-  print(columns)
-  print(anovaresult)
-}
-
-#Mostly large bodied taxa are missing from fish present lakes...
 
 #########################################################################
 #2D) Body size effects of fish: Community Weighted Mean (CWM)
@@ -698,10 +727,21 @@ cwm<-cwm%>%
   dplyr::rename(CWM=Body_mass_ug) #Body_mass_ug or mean_body_size
 
 cwm$lake_id<-as.integer(cwm$lake_id)
-env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282" )%>%
+env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%dplyr::filter(lake_id !="11505" & lake_id !="42219" &lake_id !="71257" &lake_id !="71282")%>%
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
+str(env_cwm)
+str(env)
+view(env_cwm)
 
+a<-env_cwm%>% 
+  ungroup()%>%
+  dplyr::select(c(lake_id))%>%
+  dplyr::distinct(lake_id)%>%
+  #group_by(lake_id) %>%
+  summarise(no_rows = length(lake_id))
+
+env$lake_elevation_nbr
 #########################################################################
 #Visualize influence of fish and elevation
 
