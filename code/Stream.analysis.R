@@ -730,9 +730,16 @@ site.fish.2<-envs%>%dplyr::select(c(Site,Fish))%>%dplyr::rename(site2="Site")%>%
 net.fish.1<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network1="O.NET")%>%dplyr::rename(site1="Site")
 net.fish.2<-envs%>%dplyr::select(c(O.NET,Site))%>%dplyr::rename(network2="O.NET")%>%dplyr::rename(site2="Site")
 
+env_beta_dist<-env_beta%>%column_to_rownames("Site")%>%dplyr::select(c(Elevation,Lon,Lat))
+spatial.dist<-vegdist(env_beta_dist, "euclidean")
+dist.df<-matrixConvert(spatial.dist, colname = c("site1", "site2", "spatial.dist"))
+
+cwm_dist<-datas%>%column_to_rownames("Site")%>%dplyr::select(c(Body_mass_mg))
+cwm.dist<-vegdist(cwm_dist, "euclidean")
+cwm.df<-matrixConvert(cwm.dist, colname = c("site1", "site2", "cwm.dist"))
 
 stream.df<-dist.bray.df%>%left_join(dist.bal.df,  by=c("site1", "site2"))%>%left_join(dist.gra.df,  by=c("site1", "site2"))%>%
-  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")%>%left_join(dist.df,by=c("site1", "site2"))%>%left_join(cwm.df,by=c("site1", "site2"))
 
 stream.df.filter<-stream.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
@@ -753,6 +760,19 @@ stream.df.filter%>%
   ggtitle("c)") +
   ylab("Beta Diversity")+
   facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+stream.df.filter%>%
+  filter(Network=="Same")%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=cwm.dist, y=value,colour=var))+
+  geom_point()+geom_smooth(method="lm")+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(Fish.turnover~var)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
@@ -848,9 +868,11 @@ str(env_elevation)
 
 env_beta_dist<-env_beta%>%column_to_rownames("Site")%>%dplyr::select(c(Elevation,Lon,Lat))
 spatial.dist<-vegdist(env_beta_dist, "euclidean")
+dist.df<-matrixConvert(spatial.dist, colname = c("site1", "site2", "spatial.dist"))
 
 cwm_dist<-datas%>%column_to_rownames("Site")%>%dplyr::select(c(Body_mass_mg))
 cwm.dist<-vegdist(cwm_dist, "euclidean")
+cwm.df<-matrixConvert(cwm.dist, colname = c("site1", "site2", "cwm.dist"))
 
 plot(dist,dune.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Macro dissimilarity (bray-curtis)", ylim=c(0,1))
 

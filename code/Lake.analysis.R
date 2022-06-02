@@ -899,6 +899,15 @@ lake.dist.bray.df<-matrixConvert(lake.dist.bray, colname = c("site1", "site2", "
 lake.dist.bal.df<-matrixConvert(lake.dist.bal, colname = c("site1", "site2", "dist.bal"))
 lake.dist.gra.df<-matrixConvert(lake.dist.gra, colname = c("site1", "site2", "dist.gra"))
 
+env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
+lake.dist<-vegdist(env_beta_dist, "euclidean")
+lake.dist.space<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.space"))
+
+env_cwm_d<-env_cwm%>%column_to_rownames("lake_id")%>%dplyr::select(c(CWM))%>% replace(is.na(.), 0)
+cwm.dist<-vegdist(env_cwm_d, "euclidean")
+lake.dist.cwm<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.cwm"))
+
+
 site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
 site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
 net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
@@ -908,7 +917,7 @@ str(lake.dist)
 str(site.fish.1)
 
 lake.df<-lake.dist.bray.df%>%left_join(lake.dist.bal.df,  by=c("site1", "site2"))%>%left_join(lake.dist.gra.df,  by=c("site1", "site2"))%>%
-  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
+  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")%>%left_join(lake.dist.space, by=c("site1", "site2"))%>%left_join(lake.dist.cwm, by=c("site1", "site2"))
 
 lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
                                                            "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
@@ -930,6 +939,47 @@ lake.df.filter%>%
   ggtitle("c)") +
   ylab("Beta Diversity")+
   facet_grid(~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%
+  filter(Network=="Same")%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=dist.cwm, y=value,colour=var))+
+  geom_point()+geom_smooth(method="lm")+
+  #facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Variaition in Body Mass")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(Fish.turnover~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%
+  filter(Network=="Same")%>%
+  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
+  ggplot(aes(x=dist.space, y=value,colour=var))+
+  geom_point()+geom_smooth(method="lm")+
+  #facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Beta Diversity")+
+  facet_grid(Fish.turnover~var)+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
+
+lake.df.filter%>%
+  filter(Network=="Same")%>%
+  ggplot(aes(x=dist.space, y=dist.cwm))+
+  geom_point()+geom_smooth(method="lm")+
+  #facet_grid(~Fish.turnover)+
+  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
+  xlab("Spatial Dissimilarity")+
+  ggtitle("c)") +
+  ylab("Distance CWM")+
+  #facet_grid(~Fish.turnover)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
