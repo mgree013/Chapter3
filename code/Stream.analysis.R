@@ -48,6 +48,8 @@ species_mass_data_env<-left_join(species_mass_data,envs, by="Site")%>%filter(O.N
   filter(Site !=	"	Outlet.Vidette.below.2004")%>%
   filter(Site !=	"	Outlet.Vidette.below.20012")%>%filter(Elevation >3200)
 
+species_mass_data_env
+
 ########################################################################################################################
 species_mass_data_env%>%
   filter(Fish !="NA")%>%
@@ -116,10 +118,10 @@ all_species_mass_data_env_sum<-species_mass_data_env_sum%>%
 fig1d<-all_species_mass_data_env_sum%>%
   ggplot(aes(x=Fish,y=log(M+1),fill=as.factor(Fish)))+
   geom_boxplot()+
-  ggtitle("d)") +
+  ggtitle("b)") +
   xlab("Species Absent From")+ylab("Macroinvertebrate Body Mass (mg)")+
   #facet_grid(~Feed_prim_abbrev)+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("Fishless", "Fish"))+
+  scale_fill_viridis(discrete = TRUE,name = "Species Absent From", labels = c("Fishless", "Fish"))+
   scale_x_discrete(labels=c("Fishless", "Fish"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())+
@@ -176,7 +178,8 @@ fig1b<-species_mass_data_env_filter%>%
   xlab("Macroinvertebrate Taxa")+ylab("Macroinvertebrate Log Density + 1")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
+                                                                 panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.9, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 species_mass_data_env_filter%>%
   filter(Fish !="NA")%>%
@@ -240,7 +243,7 @@ new.fig1b<-species_mass_data_env_sum%>%
   ggplot(aes(x=log(Body_mass_mg+1),y=relative_change))+
   geom_point()+
   ggtitle("b)") +
-  geom_smooth(method = "lm")+
+  geom_smooth(method = "lm",linetype="dashed" )+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   ylab("Relative Change Macroinvertebrate Density")+xlab("Macroinvertebrate Log Body Mass (mg)")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -278,7 +281,7 @@ species_mass_data_env_filter_2<-species_mass_data_env%>%
   replace(is.na(.), 0)%>% 
   group_by(Taxon)%>%
   dplyr::summarise(Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),n=n(),#Fishless.total.occupancy+Fish.total.occupancy,
-                   Yes=Fish.total.occupancy/63, No=Fishless.total.occupancy/63)%>%
+                   Yes=Fish.total.occupancy/62, No=Fishless.total.occupancy/62)%>%
   pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
   left_join(traits_mass, by="Taxon")
 
@@ -287,6 +290,15 @@ new.prop.b2<-species_mass_data_env_filter_2%>%
   ggplot(aes(x=reorder(Taxon, +Body_mass_mg),y=occupancy, fill=Fish, group=Fish))+
   geom_col( size = 0.5, position='dodge')+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                                                                 panel.border = element_blank(),panel.background = element_blank())
+
+species_mass_data_env_filter_2%>%
+  ggplot(aes(x=Fish,y=occupancy, fill=Fish, group=Fish))+
+  geom_col( size = 0.5, position='dodge')+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
+  facet_wrap(~Taxon,scales="free")+
   xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
@@ -304,10 +316,11 @@ species_mass_data_env_filter_1<-species_mass_data_env%>%
 new.prop.b<-species_mass_data_env_filter_1%>%
   ggplot(aes(x=reorder(Taxon, +Body_mass_mg),y=occupancy, fill=Fish, group=Fish))+
   geom_col( size = 0.5, position='dodge')+
+  ggtitle("d)") +
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
   xlab("Macroinvertebrate Taxa")+ylab("Proportion of Stream Sites Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
+                                                                 panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 ############################################################################################################################################
 #Diversity
 species<-read.csv(file = "sp.density.update.12.28.19_traits.csv", row.names = 1)
@@ -319,14 +332,12 @@ diversity<-species%>%
 #Add Community Biomass
 all_biomass_density_div<-all_biomass_density%>%filter(Density>0)%>%
   dplyr::select(-c(Density,M,Number_ind))%>%
-  #pivot_wider(names_from = Taxon, values_from=Biomass)%>%
   group_by(Site)%>%
   dplyr::summarize(Biomass=sum(Biomass))%>%
   mutate(Biomass=log(Biomass+1))
 
 diversity.data<-diversity%>%rownames_to_column("Site")
 
-#all<-diversity.data%>%left_join(env,by="Site")%>%left_join(betas.LCBD.data,by="Site")#%>%filter(Elevation >2790)
 all<-diversity.data%>%left_join(envs,by="Site")%>%left_join(all_biomass_density_div,by="Site")%>%filter(Elevation >3200)
 diversity.env<-all%>%filter(Fish!="NA")%>%filter(O.NET!="YOUNG")%>%
   filter(Site !=	"Outlet.11007.fishless.2003")%>%
@@ -355,7 +366,7 @@ fig3e<-diversity.env%>%
   ggplot(aes(x=Elevation, y=N1))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
-  ggtitle("e)") +
+  ggtitle("f)") +
   xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
@@ -364,7 +375,7 @@ fig3f<-diversity.env%>%ggplot(aes(x=Elevation, y=betas.LCBD))+
   geom_point()+
   geom_smooth(method = "lm",se=T)+
   xlab("Elevation (m)")+ylab("Beta-diversity (LCBD)")+
-  ggtitle("f)") +
+  ggtitle("h)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
@@ -385,31 +396,6 @@ fig3h<-diversity.env%>%  ggplot(aes(x=Elevation, y=(Biomass)))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
 
-slm<-lm(betas.LCBD~Elevation,diversity.env)
-summary(lm)
-
-mod<-betareg(betas.LCBD~Elevation,diversity.env)
-mod1<-betareg(betas.LCBD~Fish,diversity.env)
-mod2<-betareg(betas.LCBD~Elevation*Fish,diversity.env)
-mod3<-betareg(betas.LCBD~1,diversity.env)
-reported.table2 <- bbmle::AICtab(mod,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
-reported.table2
-
-mod<-glm(N1~Elevation,family=gaussian(link = "identity"),diversity.env)
-mod1<-glm(N1~Fish,family=gaussian(link = "identity"),diversity.env)
-mod2<-glm(N1~Elevation*Fish,family=gaussian(link = "identity"),diversity.env)
-mod3<-glm(N1~1,family=gaussian(link = "identity"),diversity.env)
-reported.table2 <- bbmle::AICtab(mod,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
-reported.table2
-r2(mod2)
-
-mod<-glm(Com.Size~Elevation,family=gaussian(link = "identity"),diversity.env)
-mod1<-glm(Com.Size~Fish,family=gaussian(link = "identity"),diversity.env)
-mod2<-glm(Com.Size~Elevation*Fish,family=gaussian(link = "identity"),diversity.env)
-mod3<-glm(Com.Size~1,family=gaussian(link = "identity"),diversity.env)
-reported.table2 <- bbmle::AICtab(mod,mod1,mod2,mod3,weights = TRUE, sort = FALSE)
-reported.table2
-r2(mod2)
 
 diversity.env%>%
   filter(Elevation >3100 ,Elevation <3500 )%>%
@@ -438,7 +424,7 @@ fig2f<-diversity.env%>%
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
-  ggtitle("f)") +
+  ggtitle("g)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
@@ -691,6 +677,9 @@ supp.d<-stream.elev%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")+ theme(legend.position = "none")
 
+species_mass_data_env_no<-species_mass_data_env%>%
+  group_by(Taxon)%>%
+  count()
 
 diversity.env%>%
   filter(Elevation >3200)%>%

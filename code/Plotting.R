@@ -8,13 +8,17 @@ library(tidyverse)
 
 ###########################################################################
 # Figure 1
+
+#plot_grid(new.fig1a,new.fig1b,fig1c,fig1d, nrow=2)
+plot_grid(new.fig1a,new.fig1b, nrow=1)
+plot_grid(fig1c,fig1d, nrow=1)
+
+
 plot_grid(fig1a,fig1b, nrow=2)
-
-plot_grid(new.fig1a,new.fig1b,fig1c,fig1d, nrow=2)
-
 plot_grid(new.prop.a,new.prop.b,nrow=2)
+plot_grid(fig1a,fig1b,new.prop.a,new.prop.b,nrow=4)
 
-plot_grid(new.prop.a2,new.prop.b2,nrow=2)
+#plot_grid(new.prop.a2,new.prop.b2,nrow=2)
 
 ###########################################################################
 # Figure 2
@@ -25,6 +29,9 @@ plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f,fig2g,fig2h, nrow=2)
 # Figure 3
 #plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f, nrow=2)
 plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f,fig3g,fig3h, nrow=2)
+
+plot_grid(fig2a,fig2b,fig3a,fig3b,fig2e,fig2f,fig3e,fig3f,nrow=2)
+plot_grid(fig2a,fig3a,fig2b,fig3b,fig2e,fig3e,fig2f,fig3f,nrow=2)
 
 ###########################################################################
 # Figure 4

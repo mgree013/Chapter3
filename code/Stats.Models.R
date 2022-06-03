@@ -103,7 +103,7 @@ r2(mod3)
 #Permanova/Dispersion: NMDS
 
 #lakes
-a<-adonis2(lake.bray ~ sp_abund_env_filter$actual_fish_presence+sp_abund_env_filter$lake_elevation_nbr, permutations = 99, method = "bray")
+a<-adonis2(lake.bray ~ sp_abund_env_filter$actual_fish_presence*sp_abund_env_filter$lake_elevation_nbr, permutations = 99, method = "bray")
 summary(a)
 betad <- betadiver(dune.rel, "z")
 adonis(betad ~ sp_abund_env$actual_fish_presence+sp_abund_env$lake_elevation_nbr, data=species, perm=200)
