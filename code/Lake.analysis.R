@@ -778,7 +778,7 @@ fig6a<-env_cwm%>%
   geom_smooth(method = "lm")+
   scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
   facet_grid(~actual_fish_presence, scales="free")+
-  xlab("Elevation (m)")+  ggtitle("a)") +
+  xlab("Elevation (m)")+  ggtitle("a)") +ylab("Zooplankton CWM")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
   theme(legend.position = "none")
@@ -984,13 +984,16 @@ lake.df.filter%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-beta.a<-lake.df.filter%>%
-  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
-  ggplot(aes(x=var, y=value,fill=var))+
+lake.df.filtered<-lake.df.filter%>%
+  pivot_longer(dist.bray:dist.gra, names_to ="comp" ,values_to="beta" )
+
+
+beta.a<-lake.df.filtered%>%
+  ggplot(aes(x=comp, y=beta,fill=comp))+
   geom_boxplot()+
   #facet_grid(~Fish.turnover)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  scale_x_discrete(labels=c(expression(beta[bal]),expression(beta[bray]),expression(beta[gra])))+
+  scale_x_discrete(limits = c("dist.bal","dist.gra","dist.bray"), labels=c(expression(beta[bal]),expression(beta[gra]),expression(beta[bray])))+
   xlab("Turnover and Nestedness Components")+
   ggtitle("a)") +
   labs(y=(("Zooplankton \u03B2-diversity")))+

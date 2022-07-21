@@ -591,7 +591,7 @@ fig6b<-datasz%>%
   geom_point()+
   #stat_smooth(method = glm, method.args = list(family = gaussian(link="identity")))+
   scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
-  ylab("CWM")+xlab("Elevation (m)")+  ggtitle("b)") +
+  ylab("Macroinvertebrate CWM")+xlab("Elevation (m)")+  ggtitle("b)") +
   facet_grid(~Fish,scales = "free")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
@@ -765,12 +765,14 @@ stream.df.filter%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-beta.b<-stream.df.filter%>%
-  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
-  ggplot(aes(x=var, y=value,fill=var))+
+stream.df.filtered<-stream.df.filter%>%
+  pivot_longer(dist.bray:dist.gra, names_to ="comp" ,values_to="beta" )
+
+beta.b<-stream.df.filtered%>%
+  ggplot(aes(x=comp, y=beta,fill=comp))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  scale_x_discrete(labels=c(expression(beta[bal]),expression(beta[bray]),expression(beta[gra])))+
+  scale_x_discrete(limits = c("dist.bal","dist.gra","dist.bray"), labels=c(expression(beta[bal]),expression(beta[gra]),expression(beta[bray])))+
   xlab("Turnover and Nestedness Components")+
   ggtitle("b)") +
  # ylab("Macroinvertebrate Beta Diversity")+
