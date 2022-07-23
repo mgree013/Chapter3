@@ -613,7 +613,7 @@ fig5b<-datasz%>%
   ggplot(aes(x = as.factor(Fish), y = Body_mass_mg, fill=as.factor(Fish)))+ 
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("no", "yes"))+
-  xlab("Fish Presence")+ylab("CWM")+
+  xlab("Fish Presence")+ylab("Macroinvertebrate CWM")+
   labs(fill='Fish Presence') +
   ggtitle("b)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),

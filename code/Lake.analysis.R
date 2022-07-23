@@ -757,7 +757,7 @@ fig5a<-env_cwm%>%
   #filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
   ggplot(aes(x=actual_fish_presence,y=CWM*.01, fill=actual_fish_presence))+
   geom_boxplot()+
-  xlab("Fish Presence")+ylab("CWM")+
+  xlab("Fish Presence")+ylab("Zooplankton CWM")+
   ggtitle("a)") +
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
