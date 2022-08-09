@@ -137,7 +137,13 @@ plot_grid(fig6a,fig6b,nrow=1)
 # Figure 7
 plot_grid(beta.stream.a,beta.stream.b,beta.stream.c,beta.stream.d,nrow=2)
 
-plot_grid(beta.a,beta.b,nrow=1)
+a<-plot_grid(beta.a,beta.b,nrow=1)
+file4 <- tempfile("a", fileext = ".pdf")
+save_plot(file4,base_width = 12, base_height = 9,
+          dpi = 300)
+ggsave("plotname.png", plot = a, width = 25, height = 10, dpi=600, units = "cm")
+
+
 ###########################################################################
 ###########################################################################
 #Supplemental Figure S1
