@@ -11,12 +11,22 @@ library(tidyverse)
 
 #plot_grid(new.fig1a,new.fig1b,fig1c,fig1d, nrow=2)
 plot_grid(new.fig1a,new.fig1b, nrow=1)
+
+ggsave("fig3.png", plot = new.fig1a, width = 20, height = 15, dpi=600, units = "cm")
+
 plot_grid(fig1c,fig1d, nrow=1)
 
 
 plot_grid(fig1a,fig1b, nrow=2)
 plot_grid(new.prop.a,new.prop.b,nrow=2)
 plot_grid(fig1a,fig1b,new.prop.a,new.prop.b,nrow=4)
+
+c<-plot_grid(fig1a,new.prop.a,nrow=2)
+ggsave("suppy.png", plot = c, width = 24, height = 30, dpi=600, units = "cm")
+
+ggsave("suppy2.png", plot = fig1c, width = 12, height = 10, dpi=600, units = "cm")
+
+ggsave("betadiv.png", plot = beta.a, width = 12, height = 10, dpi=600, units = "cm")
 
 #plot_grid(new.prop.a2,new.prop.b2,nrow=2)
 
@@ -25,6 +35,9 @@ plot_grid(fig1a,fig1b,new.prop.a,new.prop.b,nrow=4)
 #plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f, nrow=2)
 plot_grid(fig2a,fig2b,fig2c,fig2d,fig2e,fig2f,fig2g,fig2h, nrow=2)
 
+a<-plot_grid(fig2a,fig2b,fig3a,fig3b, nrow=2)
+ggsave("plotname.png", plot = a, width = 25, height = 20, dpi=600, units = "cm")
+getwd()
 ###########################################################################
 # Figure 3
 #plot_grid(fig3a,fig3b,fig3c,fig3d,fig3e,fig3f, nrow=2)
@@ -126,16 +139,18 @@ dev.off()
 ###########################################################################
 # Figure 5:CWM  by Fish
 plot_grid(fig5a,fig5b,nrow=1)
+ggsave("fig4.png", plot = fig5a, width = 12, height = 10, dpi=600, units = "cm")
 
 
 ###########################################################################
 # Figure 6:CWM  by Elevation
 plot_grid(fig6a,fig6b,nrow=1)
 
+ggsave("fig6.png", plot = fig6a, width = 20, height = 15, dpi=600, units = "cm")
 
 ###########################################################################
 # Figure 7
-plot_grid(beta.stream.a,beta.stream.b,beta.stream.c,beta.stream.d,nrow=2)
+plot_grid(beta.stream.a,beta.stream.b,nrow=2)
 
 a<-plot_grid(beta.a,beta.b,nrow=1)
 file4 <- tempfile("a", fileext = ".pdf")
@@ -150,4 +165,6 @@ ggsave("plotname.png", plot = a, width = 25, height = 10, dpi=600, units = "cm")
 #plot_grid(lake.elev.fish,stream.elev.fish, nrow=1)
 
 plot_grid(supp.a,supp.b,supp.c,supp.d, nrow=2)
+b<-plot_grid(supp.a,supp.b, nrow=1)
+ggsave("supp1.png", plot = b, width = 25, height = 15, dpi=600, units = "cm")
 

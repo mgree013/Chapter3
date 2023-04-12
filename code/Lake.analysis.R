@@ -228,7 +228,7 @@ fig3a<-env_div%>%
   geom_point()+
   geom_smooth(method = "lm",se=T)+
   scale_color_viridis_d()+
-  ggtitle("b)") +
+  ggtitle("c)") +
   xlab("Elevation (m)")+ylab("Species (Shannon) Diversity")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())
@@ -339,7 +339,7 @@ fig2b<-env_div%>%
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
-  ggtitle("c)") +
+  ggtitle("b)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
@@ -503,7 +503,7 @@ new.fig1a<-env_abundz_filter_plot_1%>%
   geom_point()+
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
-  ggtitle("a)") +
+  #ggtitle("a)") +
   ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Log Body Mass (ug)")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
@@ -523,7 +523,7 @@ env_abundz_filter_bm<-new%>%
 fig1c<-env_abundz_filter_bm%>%
   ggplot(aes(x=Fish,y=log(Body_mass_ug+1),fill=Fish))+
   geom_boxplot()+
-  ggtitle("a)") +
+  #ggtitle("a)") +
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   scale_x_discrete(labels=c("Fishless", "Fish"))+
@@ -544,7 +544,9 @@ fig1a<-env_abundz_filtered%>%
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   ylab("Zooplankton Log Density + 1")+xlab("Zooplankton Taxa")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+                                                                 panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")+
+  theme(legend.position = c(0.9, 0.85),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
 
 env_abundz_filtered%>%
   ggplot(aes(x=actual_fish_presence,y=log(zoop_density+1),fill=actual_fish_presence))+
@@ -615,7 +617,7 @@ env_abundzzz_new_1<-env_abundzzz_new%>%
 new.prop.a<-env_abundzzz_new_1%>%
   ggplot(aes(x=reorder(Taxon, +Body_mass_ug),y=occupancy, fill=Fish, group=Fish))+
   geom_col( size = 0.5, position='dodge')+
-  ggtitle("c)") +
+  ggtitle("b)") +
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence")+
   xlab("Zooplankton Taxa")+ylab("Proportion of Lakes Occupied")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -758,7 +760,7 @@ fig5a<-env_cwm%>%
   ggplot(aes(x=actual_fish_presence,y=CWM*.01, fill=actual_fish_presence))+
   geom_boxplot()+
   xlab("Fish Presence")+ylab("Zooplankton CWM")+
-  ggtitle("a)") +
+  #ggtitle("a)") +
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
@@ -778,10 +780,12 @@ fig6a<-env_cwm%>%
   geom_smooth(method = "lm")+
   scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
   facet_grid(~actual_fish_presence, scales="free")+
-  xlab("Elevation (m)")+  ggtitle("a)") +ylab("Zooplankton CWM")+
+  xlab("Elevation (m)")+  
+  #ggtitle("a)") +
+  ylab("Zooplankton CWM")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+
-  theme(legend.position = "none")
+  theme(legend.position = c(0.8, 0.9),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
 
 env_cwm%>%
   ggplot(aes(x=log(lake_area_nbr+1),y=CWM,colour=actual_fish_presence))+
@@ -995,7 +999,7 @@ beta.a<-lake.df.filtered%>%
   scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
   scale_x_discrete(limits = c("dist.bal","dist.gra","dist.bray"), labels=c(expression(beta[bal]),expression(beta[gra]),expression(beta[bray])))+
   xlab("Turnover and Nestedness Components")+
-  ggtitle("a)") +
+  #ggtitle("a)") +
   labs(y=(("Zooplankton \u03B2-diversity")))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
