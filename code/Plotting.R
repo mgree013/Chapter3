@@ -155,9 +155,10 @@ plot_grid(beta.stream.a,beta.stream.b,nrow=2)
 a<-plot_grid(beta.a,beta.b,nrow=1)
 file4 <- tempfile("a", fileext = ".pdf")
 save_plot(file4,base_width = 12, base_height = 9,
-          dpi = 300)
+          dpi = 600)
 ggsave("plotname.png", plot = a, width = 25, height = 10, dpi=600, units = "cm")
 
+ggsave("betas.png", plot = beta.a, width = 15, height = 10, dpi=600, units = "cm")
 
 ###########################################################################
 ###########################################################################
