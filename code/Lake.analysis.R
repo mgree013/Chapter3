@@ -340,8 +340,7 @@ fig2b<-env_div%>%
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   xlab("Fish Presence")+ylab("Beta-Diversity (LCBD)")+
   ggtitle("b)") +
-  geom_signif(comparisons = list(c("No", "Yes")), 
-              map_signif_level=TRUE)+
+  #geom_signif(comparisons = list(c("No", "Yes")), map_signif_level=TRUE)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
@@ -763,8 +762,7 @@ fig5a<-env_cwm%>%
   geom_boxplot()+
   xlab("Fish Presence")+ylab("Zooplankton CWM")+
   #ggtitle("a)") +
-  geom_signif(comparisons = list(c("No", "Yes")), 
-              map_signif_level=TRUE)+
+  #geom_signif(comparisons = list(c("No", "Yes")), map_signif_level=TRUE)+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
@@ -1004,8 +1002,7 @@ beta.a<-lake.df.filtered%>%
   scale_x_discrete(limits = c("dist.bal","dist.gra","dist.bray"), labels=c(expression(beta[bal]),expression(beta[gra]),expression(beta[bray])))+
   xlab("Turnover and Nestedness Components")+
   #ggtitle("a)") +
-  geom_signif(comparisons = list(c("dist.bal", "dist.gra")), 
-              map_signif_level=TRUE)+
+  #geom_signif(comparisons = list(c("dist.bal", "dist.gra")), map_signif_level=TRUE)+
   labs(y=(("Zooplankton \u03B2-diversity")))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
