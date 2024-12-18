@@ -10,6 +10,11 @@
 ########################################################################################################################################################################
 #Load Packages
 Packages <- c("tidyverse","betareg" ,"ggplot2", "vegan", "reshape2","reshape", "adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
+# Install missing packages
+missing_packages <- Packages[!(Packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) {
+  install.packages(missing_packages)
+}
 lapply(Packages, library, character.only = TRUE)
 
 #Load all data: Run Script "Download_Slip_Data.R"
@@ -190,6 +195,9 @@ supp.a<-env_div%>%
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
 env_div%>%
+  group_by(actual_fish_presence)%>%count()
+
+env_div%>%
   gather(N0,  N1,  Biomass, Com.Size, betas.LCBD,key = "var", value = "value")%>% 
   ggplot(aes(x=lake_elevation_nbr, y=value, colour=var))+
   geom_point()+
@@ -344,7 +352,7 @@ fig2b<-env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-fig2c<-env_div%>%
+#fig2c<-env_div%>%
   ggplot(aes(x=actual_fish_presence, y=Com.Size, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -353,7 +361,7 @@ fig2c<-env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-fig2d<-env_div%>%
+#fig2d<-env_div%>%
   ggplot(aes(x=actual_fish_presence, y=Biomass, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -505,9 +513,11 @@ new.fig1a<-env_abundz_filter_plot_1%>%
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   #ggtitle("a)") +
-  ylab("Relative Change Zooplankton Density")+xlab("Zooplankton Log Body Mass (ug)")+
+  ylab("Relative Change in Zooplankton Density")+xlab(expression("Zooplankton Body Mass ( " * mu * "g/L, Log"[10] * ")"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
+
+labs(x = expression("Zooplankton Body Mass ( " * mu * "g/L, Log"[10] * ")"))
 dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
 summary(dog)
 
@@ -528,7 +538,7 @@ fig1c<-env_abundz_filter_bm%>%
   #facet_wrap(~actual_fish_presence, scales="free")+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   scale_x_discrete(labels=c("Fishless", "Fish"))+
-  ylab("Zooplankton Log Body Mass (ug)")+xlab("Species Absent From")+
+  ylab(expression("Zooplankton Body Mass (" * mu * "g/L, Log"[10] * ")"))+xlab("Species Absent From")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank(),,legend.position = "none")
 
