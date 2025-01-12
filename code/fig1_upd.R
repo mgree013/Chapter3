@@ -223,5 +223,49 @@ glm_results_reduced <- zoop_body_size_news %>%
 # View reduced results
 glm_results_reduced
 
+# Calculate mean body mass for fish and fishless sites, and the difference
+mean_body_mass <- zoop_body_size_news %>%
+  group_by(Species_Name, actual_fish_presence) %>%
+  summarize(mean_body_mass = mean(new_weight, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = actual_fish_presence, 
+              values_from = mean_body_mass, 
+              names_prefix = "fish_") %>%
+  mutate(difference = fish_Yes - fish_No)
+
+# View the results
+print(mean_body_mass)
+
+
+################################################################################################################
+#Upd Fig 4
+
+
+fig5a<-env_cwm%>%
+  #filter(lake_elevation_nbr>2799, lake_elevation_nbr<3602)%>%
+  ggplot(aes(x=actual_fish_presence,y=CWM*.01, fill=actual_fish_presence))+
+  geom_boxplot()+
+  xlab("Fish Presence")+ylab("Zooplankton CWM")+
+  ggtitle("b)") +
+  #geom_signif(comparisons = list(c("No", "Yes")), map_signif_level=TRUE)+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank(),legend.position = "none")
+
+
+fig6a<-env_cwm%>%
+  ggplot(aes(x=lake_elevation_nbr,y=CWM,colour=actual_fish_presence))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_viridis_d(name = "Fish Presence",labels = c("No", "Yes"))+
+  facet_grid(~actual_fish_presence, scales="free")+
+  xlab("Elevation (m)")+  
+  ggtitle("a)") +
+  ylab("Zooplankton CWM")+
+  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_blank(),panel.background = element_blank())+
+  theme(legend.position = c(0.6, 0.2),legend.background = element_blank(),legend.box.background = element_rect(colour = "black"))
+
+
+plot_grid(fig6a,fig5a, ncol = 2)
 
 
