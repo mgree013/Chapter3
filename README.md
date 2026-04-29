@@ -6,13 +6,6 @@ Status of MS: In Prep
 
 Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 
-
-# Structure of Code
-
-1) Stream.Analysis.R  stream analysis
-2) Plotting.R makes all figures used in the manuscript 
-3) Stream.Analysis.R Lake anlyses and organize code
-
 # Data
 
 1) Zooplankton data (Knapp et al. 2020) used in this study can be accessed from Environmental Data Initiative at https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2. 
