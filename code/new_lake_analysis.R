@@ -38,7 +38,7 @@ clean_zoopzz <- zoopzz %>%
   group_by(lake_id, survey_date, Species_Name) %>%
   mutate(
     Counts = sum(Number) / Max.Subsample,
-    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02),
+    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number),
     Species_Name = str_replace(Species_Name, " ", "_"),
     Species_Name = str_replace(Species_Name, "/", "_")
   ) %>%

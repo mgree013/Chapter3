@@ -1,7 +1,7 @@
 #Title: The influence of non-native fish on stream macroinvertebrate and lake zooplankton communities along elevational gradients
 #Authors: Matthew Green, David Herbst, and Kurt Anderson
 
-#Analysis of Stream Communities
+#Analysis of Lake Communities
 
 
 #Link to EDI data portal: https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2
@@ -61,9 +61,8 @@ clean_zoopzz<-zoopzz%>%
   group_by(lake_id,survey_date,Species_Name)%>%
   mutate(
     Counts = sum(Number)/Max.Subsample,
-    # Correct zooplankton density formula: scale sampled count up by sample_vol,
-    # then divide by filtered volume (zoo_tow_depth * zoo_tow_number * 33.02).
-    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02),
+    # Zooplankton density: scale sampled count up by sample_vol, then divide by filtered volume
+    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number),
     Species_Name = str_replace(Species_Name, " ", "_"),
     Species_Name = str_replace(Species_Name, "/", "_")
   )%>%

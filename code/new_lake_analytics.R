@@ -22,7 +22,7 @@ env_div <- env %>%
 supp.b <- env_div %>%
   ggplot(aes(x = actual_fish_presence, fill = actual_fish_presence)) +
   geom_bar(stat = "count") +
-  stat_count(geom = "text", colour = "black", size = 3.5, aes(label = ..count..), position = position_dodge(width = 0.9), vjust = -0.25) +
+  stat_count(geom = "text", colour = "black", size = 3.5, aes(label = after_stat(count)), position = position_dodge(width = 0.9), vjust = -0.25) +
   scale_fill_viridis(discrete = TRUE, name = "Fish Presence", labels = c("No", "Yes")) +
   xlab("Fish Presence") +
   ggtitle("b)") +
