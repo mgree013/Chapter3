@@ -9,9 +9,11 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 
 # Structure of Code
 
-1) Stream.Analysis.R  stream analysis
-2) Plotting.R makes all figures used in the manuscript 
-3) Stream.Analysis.R Lake anlyses and organize code
+1) `code/new_lake_analysis.R` - download and process lake zooplankton and environmental data
+2) `code/new_lake_analytics.R` - build lake analysis objects and construct figure components
+3) `code/new_lake_models.R` - fit lake models for manuscript tables and summaries
+4) `code/new_lake_plotting.R` - save explicit manuscript figure PNGs with stable names
+5) `code/Plotting.R` - legacy figure export script for the original manuscript workflow
 
 # Data
 
@@ -22,29 +24,25 @@ Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
 
 # Results
 
-### Fig 1: Individual zooplankton (a) and macroinvertebrate (b) species responses to fish presence. Only species that occur in both fish and fishless sites are included in this figure. The order of each x-axis is based on average body size, from smallest to largest species.
-![](Newfigs/Fig1.new.png)
+### Current generated lake figures
+- `fig2a.png` — Lake diversity by fish presence: Shannon diversity
+- `fig2b.png` — Lake diversity by fish presence: beta-diversity (LCBD)
+- `fig2c.png` — Lake diversity by fish presence: community size
+- `fig2d.png` — Lake diversity by fish presence: community biomass
+- `fig3a.png` — Lake diversity along elevation: Shannon diversity
+- `fig3b.png` — Lake diversity along elevation: beta-diversity (LCBD)
+- `fig3c.png` — Lake diversity along elevation: community size
+- `fig3d.png` — Lake diversity along elevation: community biomass
+- `fig2_panel.png` — combined lake figure panel for Fig 2
+- `fig3_panel.png` — combined lake figure panel for Fig 3
+- `supp1.png` — supplemental fish presence / elevation figure
 
-### Fig 2: Zooplankton (a-c) and macroinvertebrate (d-f) community diversity response as a function of fish presence.
-![](Newfigs/Old/Fig2.png)
-
-### Fig 3: Zooplankton (a-c) and macroinvertebrate (d-f) community diversity along an elevational gradient.
-![](Newfigs/Old/Fig3.png)
-
-### Fig 4:  Ordination of zooplankton  (a) and macroinvertebrate (b) species from Sierra Nevada, CA as a function  of  fish and elevation
-![](Newfigs/Old/Fig4.1.png)
-
-### Fig 5: CWM of zooplankton (a) and macroinvertebrate (b) community biomass as a function of fish presence.
-![](Newfigs/Old/Fig5.png)
-
-### Fig 6: CWM of zooplankton (a) and macroinvertebrate (b) community biomass along an elevational gradient.
-![](Newfigs/Old/Fig6.png)
-
-### Fig 7: Beta diversity of zooplankton (a) and macroinvertebrate (b) communities as a function of fish.
-![](Newfigs/Old/Fig7.png)
+### Notes
+- The zooplankton density calculation is implemented in `code/new_lake_analysis.R` as `Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02)`.
+- Figure outputs are saved to the project root when `code/new_lake_plotting.R` is run.
 
 # Supplemental
 
 ### Fig S1: Fish presence as a function of elevation (m) for lakes and streams.
-![](Newfigs/Old/FigS1.png)
+`code/new_lake_plotting.R` saves `supp1.png` for the current lake supplemental figure.
 

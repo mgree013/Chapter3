@@ -9,7 +9,7 @@
 #Data set title: The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California.
 ########################################################################################################################################################################
 #Load Packages
-Packages <- c("tidyverse","betareg" ,"ggplot2", "vegan", "reshape2","reshape", "adespatial", "sf", "mapview", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
+Packages <- c("tidyverse","betareg" ,"ggplot2", "vegan", "reshape2","reshape", "adespatial", "sf", "viridis", "FD","multcomp","semPlot","lavaan", "performance")
 # Install missing packages
 missing_packages <- Packages[!(Packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) {
@@ -17,8 +17,24 @@ if(length(missing_packages)) {
 }
 lapply(Packages, library, character.only = TRUE)
 
+distance_df <- function(dist_obj, colname = c("site1", "site2", "distance")) {
+  m <- as.matrix(dist_obj)
+  combs <- which(upper.tri(m), arr.ind = TRUE)
+  data.frame(
+    site1 = rownames(m)[combs[, 1]],
+    site2 = rownames(m)[combs[, 2]],
+    distance = m[combs],
+    stringsAsFactors = FALSE
+  ) %>% setNames(colname)
+}
+
 #Load all data: Run Script "Download_Slip_Data.R"
+setwd("~/Library/CloudStorage/Dropbox/Manuscipts/Chapter 3/Chapter3/")
 source("code/Download_Slip_Data.R", echo = TRUE)
+
+setwd("/Users/matthewgreen/Library/CloudStorage/Dropbox/Manuscipts/Chapter 3/Chapter3/data")
+av_zoop_body_size_new <- read.csv("length_mass_regress_zoop.csv", row.names = 1) %>%
+  dplyr::select(Body_mass_ug)
 ########################################################################################################################################################################
 #Part 1) Organize Species and Environmental Data Set: There are a lot of separate files that need to be cleaned and then merged together
 
@@ -32,21 +48,32 @@ dt8.1<-dt8%>%
 
 #Correct sub sample issue to make equal comparison among sites
 clean_zoopzz<-zoopzz%>%
-  left_join(dt8.1,by=c("lake_id", "survey_date"))%>%
+  left_join(dt8.1, by=c("lake_id", "survey_date"))%>%
+  left_join(
+    dt13 %>%
+      group_by(lake_id, survey_date) %>%
+      summarise(sample_vol = first(sample_vol), .groups = "drop"),
+    by = c("lake_id", "survey_date")
+  )%>%
   group_by(lake_id,survey_date)%>%
   mutate(Max.Subsample=max(Subsample))%>%
   ungroup()%>%
   group_by(lake_id,survey_date,Species_Name)%>%
-  mutate(Counts=sum(Number)/Max.Subsample,
-         sample_volume=(3.14*0.295*zoo_tow_depth)/4,zoop_density=Counts/(sample_volume/zoo_tow_depth)*zoo_tow_number*33.02,
-         Species_Name = str_replace(Species_Name, " ", "_"), #replace spaces in names with "_"
-         Species_Name = str_replace(Species_Name, "/", "_"))%>% #replace / in names with "_"
+  mutate(
+    Counts = sum(Number)/Max.Subsample,
+    # Correct zooplankton density formula: scale sampled count up by sample_vol,
+    # then divide by filtered volume (zoo_tow_depth * zoo_tow_number * 33.02).
+    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02),
+    Species_Name = str_replace(Species_Name, " ", "_"),
+    Species_Name = str_replace(Species_Name, "/", "_")
+  )%>%
   filter(Species_Name != "standard_measurement")%>%
-  dplyr::select(c(lake_id,survey_date,Species_Name,zoop_density))%>% 
-  distinct(lake_id,survey_date,Species_Name,zoop_density) #remove duplicates in data
+  dplyr::select(lake_id, survey_date, Species_Name, zoop_density)%>%
+  distinct(lake_id, survey_date, Species_Name, zoop_density)
 
 #Biomass
-zoop_body_mass<-av_zoop_body_size_new%>%rownames_to_column("Taxon")
+zoop_body_mass <- av_zoop_body_size_new %>%
+  rownames_to_column("Taxon")
 
 clean_zoopz_biomass<-zoopzz%>%
   left_join(dt8.1,by=c("lake_id", "survey_date"))%>%
@@ -62,7 +89,7 @@ clean_zoopz_biomass<-zoopzz%>%
   group_by(lake_id,survey_date,Taxon)%>%
   mutate(Biomass=Counts*Body_mass_ug)%>%
   dplyr::select(c(lake_id,survey_date,Taxon,Biomass))
-  
+
 
 #########################################################################
 #1B) Pivot Data Set long to wide format for Species abundance Matrix
@@ -101,7 +128,7 @@ str(clean_zoopz_biomass_site)
 #Part 1C) Organize Environmental Data Set and merge with Species Data
 
 #Add in GPS coordinates from LAKEID variable: Using sieera_lakes arc GIS export to excel
-gps<-read.csv("data/sierra_lakes.csv")
+gps<-read.csv("sierra_lakes.csv")
 
 dt5.1<-dt5%>%
   pivot_wider(names_from = littoral_type, names_glue = "{littoral_type}_{.value}",values_from=littoral_amount)
@@ -150,18 +177,18 @@ str(env)
 ##########################################################################
 #2A)MAP Spatial Visualization of species diversity metrics
 
-mapviewOptions(fgb = FALSE)
+#mapviewOptions(fgb = FALSE)
 
-new_env_div<-env_div%>%filter(N0>0)
+#new_env_div<-env_div%>%filter(N0>0)
 
 #Diversity Metrics
-snw_sf <- st_as_sf(new_env_div, coords = c("Lon", "Lat"), crs=4326, remove = FALSE)
-mapview(snw_sf, zcol="betas.LCBD", layer.name="LCBD")
-mapview(snw_sf, zcol="N0", layer.name="Species Richness")
-mapview(snw_sf, zcol="N1", layer.name="Species Diversity")
+#snw_sf <- st_as_sf(new_env_div, coords = c("Lon", "Lat"), crs=4326, remove = FALSE)
+#mapview(snw_sf, zcol="betas.LCBD", layer.name="LCBD")
+#mapview(snw_sf, zcol="N0", layer.name="Species Richness")
+#mapview(snw_sf, zcol="N1", layer.name="Species Diversity")
 
 #fish Presence
-mapview(snw_sf, zcol="actual_fish_presence", layer.name="Fish Presence")
+#mapview(snw_sf, zcol="actual_fish_presence", layer.name="Fish Presence")
 #########################################################################
 
 #2B) Explore Relationships among Diversity as a function of environmental variables: Visualization and Stats
@@ -171,7 +198,7 @@ env_div<-left_join(env,local_diversity, by=c("lake_id", "survey_date"))%>%filter
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)
 
 supp.b<-env_div%>%
- ggplot(aes(x=actual_fish_presence, fill=actual_fish_presence))+
+  ggplot(aes(x=actual_fish_presence, fill=actual_fish_presence))+
   geom_bar(stat="count")+
   stat_count(geom = "text", colour = "black", size = 3.5,
              aes(label = ..count..),position=position_dodge(width=0.9), vjust=-0.25)+
@@ -182,7 +209,7 @@ supp.b<-env_div%>%
   #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-  
+
 supp.a<-env_div%>%
   ggplot(aes(x = actual_fish_presence, y = lake_elevation_nbr, fill=actual_fish_presence))+ 
   geom_boxplot()+
@@ -352,16 +379,16 @@ fig2b<-env_div%>%
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-#fig2c<-env_div%>%
+fig2c<-env_div%>%
   ggplot(aes(x=actual_fish_presence, y=Com.Size, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
+  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+ 
   xlab("Fish Presence")+ylab("Community Size")+
   ggtitle("c)") +
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 
-#fig2d<-env_div%>%
+fig2d<-env_div%>%
   ggplot(aes(x=actual_fish_presence, y=Biomass, fill=as.factor(actual_fish_presence)))+
   geom_boxplot()+
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
@@ -457,7 +484,7 @@ env_abundzzz%>%
   scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
   ylab("Zooplankton Density")+xlab("Zooplankton Species")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())
 
 ##########
 #Just Select Species that occur in fish and fishless sites
@@ -472,6 +499,7 @@ env_abundz_filter<-env_abundzzz%>%
   mutate(change_density=No-Yes, change_1_density=Yes-No,relative_change=Yes/No,abs.change=abs(No-Yes),
          new_change=(Yes-No)/(.5*(Yes+No)))
 
+
 env_abundz_filter%>%
   ggplot(aes(x=log(Body_mass_ug+1),y=change_density))+
   geom_point()+
@@ -479,7 +507,7 @@ env_abundz_filter%>%
   geom_hline(yintercept=0, linetype='dotted', col = 'black')+
   ylab("Change Zooplankton Density")+xlab("Zooplankton Body Size")+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())
 
 dog<-lm(change_density~log(Body_mass_ug+1),env_abundz_filter)
 summary(dog)
@@ -493,10 +521,11 @@ env_abundz_filter%>%
   ylab("Cahnge Zooplankton Density")+xlab("Zooplankton Body Size")+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
-env_abundz_filter_plot<-env_abundz_filter%>%pivot_longer(No:Yes, "actual_fish_presence")
-env_abundz_filter_plot%>%
-  filter(relative_change != "NA")%>%
-  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median),y=relative_change))+
+env_abundz_filter_plot <- env_abundz_filter %>%
+  pivot_longer(cols = c(No, Yes), names_to = "actual_fish_presence", values_to = "Mean_density")
+env_abundz_filter_plot %>%
+  filter(!is.na(relative_change)) %>%
+  ggplot(aes(x=reorder(Taxon, Body_mass_ug, FUN = median), y = relative_change)) +
   geom_boxplot()+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   #facet_wrap(~actual_fish_presence, scales="free")+
@@ -505,47 +534,34 @@ env_abundz_filter_plot%>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
 
-
-new.fig1a<-env_abundz_filter_plot_1%>%
-  filter(relative_change != "NA")%>%
+new.fig1a<-env_abundz_filter_plot %>%
+  filter(!is.na(relative_change))%>%
   ggplot(aes(x= log(Body_mass_ug+1),y=relative_change))+
   geom_point()+
   geom_smooth(method = "lm")+
   geom_hline(yintercept=1, linetype='dotted', col = 'black')+
   #ggtitle("a)") +
-  ylab("Relative Change in Zooplankton Density")+xlab(expression("Zooplankton Body Mass ( " * mu * "g/L, Log"[10] * ")"))+
+  ylab("Relative Change in Zooplankton Density")+xlab(expression("Zooplankton Body Mass ( " * mu * "g/L, Log"[10] * ")"))+ 
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
-
-labs(x = expression("Zooplankton Body Mass ( " * mu * "g/L, Log"[10] * ")"))
-dog<-lm(relative_change~log(Body_mass_ug+1),env_abundz_filter_plot)
-summary(dog)
+        panel.border = element_blank(),panel.background = element_blank())
 
 new<-env_abundzzz%>%
   left_join(av_zoop_body_size_newer, by="Taxon")%>%
   group_by(Taxon,actual_fish_presence,Body_mass_ug)%>%
-  summarise(Mean_density=mean(log(zoop_density+1)))%>%
-  pivot_wider(names_from=actual_fish_presence,values_from =Mean_density )
+  summarise(Mean_density=mean(log(zoop_density+1)), .groups = "drop")%>%
+  pivot_wider(names_from=actual_fish_presence, values_from=Mean_density)
 
 env_abundz_filter_bm<-new%>%
-  filter(Taxon=="Alona_spp."| Taxon=="Alonella_excisa" |Taxon=="Ascomorpha_spp."|Taxon=="Asplanchna_spp."|Taxon=="Polyarthra_vulgaris"|Taxon=="Polyphemus_pediculus"|Taxon=="Trichotria_spp.")%>%
-  pivot_longer(cols=Yes:No, names_to = "Fish" )
+  filter(Taxon %in% c("Alona_spp.", "Alonella_excisa", "Ascomorpha_spp.", "Asplanchna_spp.", "Polyarthra_vulgaris", "Polyphemus_pediculus", "Trichotria_spp."))%>%
+  pivot_longer(cols=Yes:No, names_to = "Fish", values_to = "Mean_density")
 
-fig1c<-env_abundz_filter_bm%>%
-  ggplot(aes(x=Fish,y=log(Body_mass_ug+1),fill=Fish))+
-  geom_boxplot()+
-  #ggtitle("a)") +
-  #facet_wrap(~actual_fish_presence, scales="free")+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  scale_x_discrete(labels=c("Fishless", "Fish"))+
-  ylab(expression("Zooplankton Body Mass (" * mu * "g/L, Log"[10] * ")"))+xlab("Species Absent From")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank(),,legend.position = "none")
 
 
 env_abundz_filtered<-env_abundzzz%>%
-  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)#%>%
-  filter(Taxon !="Collotheca_spp." ,Taxon !="Eurycercus_lamellatus" ,Taxon !="Lecane_spp." ,Taxon !="Monostyla_spp." ,Taxon !="Polyarthra_vulgaris" ,Taxon !="Simocephalus_serrulatus" )
+  filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500) %>%
+  filter(HA>=0.5) %>%
+  filter(lake_max_depth>3) %>%
+  filter(!Taxon %in% c("Collotheca_spp.", "Eurycercus_lamellatus", "Lecane_spp.", "Monostyla_spp.", "Polyarthra_vulgaris", "Simocephalus_serrulatus"))
 
 fig1a<-env_abundz_filtered%>%
   ggplot(aes(x=reorder(Taxon, Mean_body_size_mm, FUN = median),y=log(zoop_density+1),fill=actual_fish_presence))+
@@ -569,31 +585,10 @@ env_abundz_filtered%>%
   facet_wrap(~Taxon)+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                                                                  panel.border = element_blank(),panel.background = element_blank())
-
-env_abundzzz_new%>%
-  ggplot(actual_fish_presence, aes(Taxon))+
-  geom_bar()+
-  ggtitle("a)") +
-  #facet_wrap(~actual_fish_presence, scales="free")+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Presence", labels = c("No", "Yes"))+
-  ylab("Zooplankton Log Density + 1")+xlab("Zooplankton Taxa")+
-  facet_wrap(~Taxon)+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
-
-
 env_abundzzz_new<-env_abundzzz%>%
   filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%filter(HA>=0.5)%>%filter(lake_max_depth>3)%>%
   dplyr::select(c(lake_id,survey_date,Taxon,zoop_density,actual_fish_presence,lake_elevation_nbr,Mean_body_size_mm))%>%
   filter(Taxon !="nauplii")
-
-a<-env_cwm%>% 
-  ungroup()%>%
-  dplyr::select(c(lake_id))%>%
-  dplyr::distinct(lake_id)%>%
-  #group_by(lake_id) %>%
-  summarise(no_rows = length(lake_id))
-
 
 env_abundzzz_new%>%
   ggplot(aes(x=actual_fish_presence,y=log(zoop_density+1),fill=actual_fish_presence))+
@@ -641,7 +636,7 @@ env_abundzzz_new_1%>%
   xlab("Zooplankton Taxa")+ylab("Proportion of Lakes Occupied")+
   facet_wrap(~Taxon)+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                 panel.border = element_blank(),panel.background = element_blank())
+        panel.border = element_blank(),panel.background = element_blank())
 
 env_abundzzz_new_1%>%
   filter(n>8)%>%
@@ -651,7 +646,7 @@ env_abundzzz_new_1%>%
   scale_colour_viridis(discrete = TRUE,name = "Fish Presence")+
   facet_grid(~Fish)+
   xlab("Zooplankton Body Size")+ylab("Proportion of Lakes Occupied")+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                                                      panel.border = element_blank(),panel.background = element_blank())
+                                                                           panel.border = element_blank(),panel.background = element_blank())
 
 
 #2) Occupancy of all lakes
@@ -661,10 +656,9 @@ env_abundzzz_new_2<-env_abundzzz_new%>%
   pivot_wider(names_from = actual_fish_presence,values_from = zoop_density)%>%
   dplyr::mutate(Fishless.Occupancy=if_else(No>0, 1,0),Fish.Occupancy=if_else(Yes>0, 1,0))%>%
   replace(is.na(.), 0)%>% 
-  add_column(Nmbr.Lakes=602)%>%
   group_by(Taxon)%>%
   dplyr::summarise(n=n(),Fish.total.occupancy=sum(Fish.Occupancy),Fishless.total.occupancy=sum(Fishless.Occupancy),
-                   Yes=Fish.total.occupancy/Nmbr.Lakes, No=Fishless.total.occupancy/Nmbr.Lakes)%>%
+                   Yes=Fish.total.occupancy/602, No=Fishless.total.occupancy/602, .groups = "drop")%>%
   pivot_longer(cols=Yes:No,names_to = "Fish", values_to="occupancy")%>%
   left_join(env_abundz_body, by="Taxon")
 
@@ -704,19 +698,9 @@ regional.names<-env_abundzz %>%
 
 #########################################################################
 #2D) Body size effects of fish: Community Weighted Mean (CWM)
-#dt11/dt12
-av_zoop_body_size_new<-dt11%>%
-  left_join(dt12, by = "SpeciesID")%>%
-  mutate(Species_Name = str_replace(Species_Name, " ", "_"),
-         Species_Name = str_replace(Species_Name, "/", "_"))%>%
-  group_by(Species_Name)%>%
-  summarize(mean_body_size=mean(Length))%>%
-  filter(Species_Name !="standard_measurement")%>%
-  remove_rownames()%>%
-  column_to_rownames('Species_Name')
-
-av_zoop_body_size_new<-read.csv("length_mass_regress_zoop.csv",row.names = 1)
-av_zoop_body_size_new<-av_zoop_body_size_new%>%dplyr::select(-c(Mean_body_size_mm))
+# Load zooplankton body mass data for CWM calculations
+av_zoop_body_size_new <- read.csv("length_mass_regress_zoop.csv", row.names = 1) %>%
+  dplyr::select(-Mean_body_size_mm)
 
 pivot_clean_zoopzz<-clean_zoopzz%>%pivot_wider(names_from = "Species_Name",values_from="zoop_density")%>%
   unite("id_date",lake_id:survey_date)%>%
@@ -726,10 +710,40 @@ pivot_clean_zoopzz<-clean_zoopzz%>%pivot_wider(names_from = "Species_Name",value
   replace(is.na(.), 0)%>%
   dplyr::select(sort(names(.)))
 
-#Calculate CWM
-if(dim(pivot_clean_zoopzz)[2]!=dim(av_zoop_body_size_new)[1])stop("error:differentnumberofspeciesin'traits'and'abundances'matrices")
+trait_species <- rownames(av_zoop_body_size_new)
+comm_species <- intersect(colnames(pivot_clean_zoopzz), trait_species)
 
-tres_bm = dbFD(av_zoop_body_size_new,pivot_clean_zoopzz, corr = ("lingoes"),
+if (length(comm_species) == 0) {
+  stop("error: no shared species between trait and abundance matrices")
+}
+
+extra_abund_species <- setdiff(colnames(pivot_clean_zoopzz), trait_species)
+if (length(extra_abund_species) > 0) {
+  message("Dropping ", length(extra_abund_species), " abundance species with no trait data.")
+}
+
+pivot_clean_zoopzz <- pivot_clean_zoopzz[, comm_species, drop = FALSE]
+av_zoop_body_size_new <- av_zoop_body_size_new[comm_species, , drop = FALSE]
+
+zero_total_species <- which(colSums(pivot_clean_zoopzz) == 0)
+if (length(zero_total_species) > 0) {
+  message("Removing ", length(zero_total_species), " zero-total-abundance species before CWM.")
+  pivot_clean_zoopzz <- pivot_clean_zoopzz[, -zero_total_species, drop = FALSE]
+  av_zoop_body_size_new <- av_zoop_body_size_new[colnames(pivot_clean_zoopzz), , drop = FALSE]
+}
+
+zero_sum_sites <- which(rowSums(pivot_clean_zoopzz) == 0)
+if (length(zero_sum_sites) > 0) {
+  message("Removing ", length(zero_sum_sites), " zero-sum communities before CWM.")
+  pivot_clean_zoopzz <- pivot_clean_zoopzz[-zero_sum_sites, , drop = FALSE]
+}
+
+#Calculate CWM
+if (dim(pivot_clean_zoopzz)[2] != dim(av_zoop_body_size_new)[1]) {
+  stop("error:differentnumberofspeciesin'traits'and'abundances'matrices")
+}
+
+tres_bm = dbFD(av_zoop_body_size_new, pivot_clean_zoopzz, corr = ("lingoes"),
                stand.FRic = TRUE, calc.FDiv = TRUE)
 
 #Combine CWM with env and organize data
@@ -745,14 +759,7 @@ env_cwm<-left_join(env,cwm, by=c("lake_id", "survey_date"))%>%dplyr::filter(lake
 
 str(env_cwm)
 str(env)
-view(env_cwm)
-
-a<-env_cwm%>% 
-  ungroup()%>%
-  dplyr::select(c(lake_id))%>%
-  dplyr::distinct(lake_id)%>%
-  #group_by(lake_id) %>%
-  summarise(no_rows = length(lake_id))
+# view(env_cwm)
 
 env$lake_elevation_nbr
 #########################################################################
@@ -844,41 +851,59 @@ pseudoR1
 #2E) Multivariate Ordinations (NMDS)
 
 set.seed(99)
-species<-sp_abund_env[,3:39]
-dune.rel<-decostand(species,"total") #standardize community data
-dune.bray<-vegdist(dune.rel) #calculate dissimilarity among sites (i.e. dissimilarity matrix)
-dune.nmds=metaMDS(dune.rel, k=2, try=10) #NMDS code
-dune.nmds
-stressplot(dune.nmds) #this tells us if our plot is going to work, and it looks good
 
-plot(dune.nmds,typ= "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
-#text(dune.nmds$species[,1], dune.nmds$species[,2], rownames(dune.nmds$species), cex=0.7, col ="black")
-points(dune.nmds$points[,1], dune.nmds$points[,2],  pch = 1) 
-ordihull(dune.nmds, sp_abund_env$actual_fish_presence, display="sites", label=F,lwd=2, col=c("blue","orange"))
-ordisurf(dune.nmds, sp_abund_env$lake_elevation_nbr, prioirty=,labcex=0.9, add = T,col="forestgreen")
+nmds_species <- sp_abund_env %>%
+  dplyr::select(c(Alona_spp.:Trichotria_spp.)) %>%
+  mutate(across(everything(), as.numeric)) %>%
+  replace(is.na(.), 0)
 
-#PERMANOVA analysis-Whats driving variation we see above?
-adonis2(dune.bray ~ sp_abund_env$actual_fish_presence+sp_abund_env$lake_elevation_nbr+sp_abund_env$lake_drainage_name, permutations = 99, method = "bray")
-betad <- betadiver(dune.rel, "z")
-adonis(betad ~ sp_abund_env$actual_fish_presence+sp_abund_env$lake_elevation_nbr, data=species, perm=200)
+keep <- rowSums(nmds_species) > 0
+if (sum(keep) < 3) {
+  message("Skipping NMDS: fewer than 3 lake communities with species data.")
+} else {
+  nmds_species <- nmds_species[keep, , drop = FALSE]
+  env_nmds <- sp_abund_env[keep, ]
 
-adonis2(dune.bray ~ sp_abund_env$actual_fish_presence, permutations = 99, method = "bray")
-betad <- betadiver(dune.rel, "z")
-adonis(betad ~ sp_abund_env$actual_fish_presence, data=species, perm=200)
+  dune.rel <- decostand(nmds_species, "total")
+  if (any(!is.finite(as.matrix(dune.rel)))) {
+    stop("Non-finite values found in NMDS community matrix after standardization.")
+  }
 
-dune.envfit <- envfit(dune.nmds, env = sp_abund_env$lake_elevation_nbr, perm = 999) #standard envfit
-dune.envfit
-env.scores.dune <- as.data.frame(scores(dune.envfit, display = "vectors")) #extracts relevant scores from envifit
-env.data = cbind(sp_abund_env$lake_elevation_nbr)
-mds.data.envfit = envfit(dune.nmds, env.data)
+  dune.bray <- vegdist(dune.rel)
+  dune.nmds <- metaMDS(dune.rel, k = 2, try = 10, trace = FALSE)
+  stressplot(dune.nmds)
 
-plot(mds.data.envfit, col = "black", labels = c( "Elevation"), lwd = 2)
+  plot(dune.nmds, type = "n", xlab = "NMDS Axis 1", ylab = "NMDS Axis 2")
+  points(dune.nmds$points[, 1], dune.nmds$points[, 2], pch = 1)
+  ordihull(dune.nmds, env_nmds$actual_fish_presence, display = "sites", label = FALSE, lwd = 2, col = c("blue", "orange"))
+  ordisurf(dune.nmds, env_nmds$lake_elevation_nbr, labcex = 0.9, add = TRUE, col = "forestgreen")
 
-mod <- betadisper(dune.bray, sp_abund_env$actual_fish_presence)
-anova(mod)
-print(mod)
-permutest(mod)
-boxplot(mod)
+    adonis2(dune.bray ~ actual_fish_presence + lake_elevation_nbr + lake_drainage_name,
+      data = env_nmds,
+      permutations = 99,
+      method = "bray")
+    dune.betad <- betadiver(dune.rel, "z")
+    adonis2(dune.betad ~ actual_fish_presence + lake_elevation_nbr,
+      data = env_nmds,
+      permutations = 200)
+
+    adonis2(dune.bray ~ actual_fish_presence,
+      data = env_nmds,
+      permutations = 99,
+      method = "bray")
+
+  dune.envfit <- envfit(dune.nmds, env = env_nmds$lake_elevation_nbr, perm = 999)
+  env.scores.dune <- as.data.frame(scores(dune.envfit, display = "vectors"))
+  env.data <- cbind(env_nmds$lake_elevation_nbr)
+  mds.data.envfit <- envfit(dune.nmds, env.data)
+  plot(mds.data.envfit, col = "black", labels = c("Elevation"), lwd = 2)
+
+  mod <- betadisper(dune.bray, env_nmds$actual_fish_presence)
+  anova(mod)
+  print(mod)
+  permutest(mod)
+  boxplot(mod)
+}
 
 
 ####################################################################################################################################################################################################################################################################################################
@@ -890,280 +915,128 @@ lake.elev.fish<-env_div%>%
   xlab("Fish Presence")+
   ggtitle("a)") +
   ylab("Elevation (m)")+
-#scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
+  #scale_fill_discrete(name = "Fish Presence", labels = c("no", "yes"))+
   theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
 ####################################################################################################################################################################################################################################################################################################
 library(betapart)
 
+# Beta diversity for lakes filtered by elevation, habitat, and depth
+sp_abund_env_filter <- sp_abund_env %>%
+  filter(lake_elevation_nbr > 1800,
+         lake_elevation_nbr < 3500,
+         HA >= 0.5,
+         lake_max_depth > 3) %>%
+  unite("site_id", lake_id, survey_date, remove = FALSE)
 
+species <- sp_abund_env_filter %>%
+  dplyr::select(c(Alona_spp.:Trichotria_spp.)) %>%
+  mutate(across(everything(), as.numeric)) %>%
+  replace(is.na(.), 0)
 
-#betapart
-sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
-  filter(HA>=0.5)%>%filter(lake_max_depth>3)
+keep <- rowSums(species) > 0
+species <- species[keep, , drop = FALSE]
+sp_abund_env_filter <- sp_abund_env_filter[keep, ]
+rownames(species) <- sp_abund_env_filter$site_id
 
-species<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))#%>%dplyr::select(-c(nauplii,Cyclopoida))
-lake.rel<-decostand(species,"total")
+if (nrow(species) < 3) {
+  stop("Not enough lake communities with species data for beta diversity analysis.")
+}
 
-lake.dist<-beta.multi.abund(species,index.family="bray")
+lake.dist <- beta.pair.abund(species, index.family = "bray")
+lake.dist.bray.df <- distance_df(lake.dist$beta.bray, colname = c("site1", "site2", "dist.bray"))
+lake.dist.bal.df <- distance_df(lake.dist$beta.bray.bal, colname = c("site1", "site2", "dist.bal"))
+lake.dist.gra.df <- distance_df(lake.dist$beta.bray.gra, colname = c("site1", "site2", "dist.gra"))
 
-lake.dist<-beta.pair.abund(species,index.family="bray")
-lake.dist.bal<-lake.dist$beta.bray.bal
-lake.dist.gra<-lake.dist$beta.bray.gra
-lake.dist.bray<-lake.dist$beta.bray
+spatial.dist <- sp_abund_env_filter %>%
+  dplyr::select(site_id, lake_elevation_nbr, Lon, Lat) %>%
+  as.data.frame()
+rownames(spatial.dist) <- spatial.dist$site_id
+spatial.dist$site_id <- NULL
+spatial.dist <- replace(spatial.dist, is.na(spatial.dist), 0)
+space.df <- distance_df(vegdist(as.matrix(spatial.dist), "euclidean"), colname = c("site1", "site2", "dist.space"))
 
-lake.dist.bray.df<-matrixConvert(lake.dist.bray, colname = c("site1", "site2", "dist.bray"))
-lake.dist.bal.df<-matrixConvert(lake.dist.bal, colname = c("site1", "site2", "dist.bal"))
-lake.dist.gra.df<-matrixConvert(lake.dist.gra, colname = c("site1", "site2", "dist.gra"))
+cwm.dist <- env_cwm %>%
+  unite("site_id", lake_id, survey_date, remove = FALSE) %>%
+  filter(site_id %in% sp_abund_env_filter$site_id) %>%
+  dplyr::select(site_id, CWM) %>%
+  replace(is.na(.), 0) %>%
+  as.data.frame()
+rownames(cwm.dist) <- cwm.dist$site_id
+cwm.dist$site_id <- NULL
+cwm.df <- distance_df(vegdist(as.matrix(cwm.dist), "euclidean"), colname = c("site1", "site2", "dist.cwm"))
 
-env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
-lake.dist<-vegdist(env_beta_dist, "euclidean")
-lake.dist.space<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.space"))
+site.fish.1 <- sp_abund_env_filter %>%
+  dplyr::select(site_id, actual_fish_presence) %>%
+  dplyr::rename(site1 = site_id, fish1 = actual_fish_presence)
+site.fish.2 <- sp_abund_env_filter %>%
+  dplyr::select(site_id, actual_fish_presence) %>%
+  dplyr::rename(site2 = site_id, fish2 = actual_fish_presence)
 
-env_cwm_d<-env_cwm%>%column_to_rownames("lake_id")%>%dplyr::select(c(CWM))%>% replace(is.na(.), 0)
-cwm.dist<-vegdist(env_cwm_d, "euclidean")
-lake.dist.cwm<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.cwm"))
+net.fish.1 <- sp_abund_env_filter %>%
+  dplyr::select(lake_drainage_name, site_id) %>%
+  dplyr::rename(network1 = lake_drainage_name, site1 = site_id)
+net.fish.2 <- sp_abund_env_filter %>%
+  dplyr::select(lake_drainage_name, site_id) %>%
+  dplyr::rename(network2 = lake_drainage_name, site2 = site_id)
 
+lake.df <- lake.dist.bray.df %>%
+  left_join(lake.dist.bal.df, by = c("site1", "site2")) %>%
+  left_join(lake.dist.gra.df, by = c("site1", "site2")) %>%
+  left_join(space.df, by = c("site1", "site2")) %>%
+  left_join(cwm.df, by = c("site1", "site2")) %>%
+  left_join(site.fish.1, by = "site1") %>%
+  left_join(site.fish.2, by = "site2") %>%
+  left_join(net.fish.1, by = "site1") %>%
+  left_join(net.fish.2, by = "site2")
 
-site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
-site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
-net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
-net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
+lake.df.filter <- lake.df %>%
+  mutate(
+    Fish.turnover = case_when(
+      fish1 == "Yes" & fish2 == "Yes" ~ "Fish2fish",
+      fish1 == "Yes" & fish2 == "No" ~ "Fish2nofish",
+      fish1 == "No" & fish2 == "No" ~ "Nofish2noFish",
+      TRUE ~ "NoFish2fish"
+    ),
+    Network = if_else(network1 == network2, "Same", "Different")
+  )
 
-str(lake.dist)
-str(site.fish.1)
+lake.df.filtered <- lake.df.filter %>%
+  pivot_longer(cols = dist.bray:dist.gra, names_to = "comp", values_to = "beta")
 
-lake.df<-lake.dist.bray.df%>%left_join(lake.dist.bal.df,  by=c("site1", "site2"))%>%left_join(lake.dist.gra.df,  by=c("site1", "site2"))%>%
-  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")%>%left_join(lake.dist.space, by=c("site1", "site2"))%>%left_join(lake.dist.cwm, by=c("site1", "site2"))
+beta.a <- lake.df.filtered %>%
+  ggplot(aes(x = comp, y = beta, fill = comp)) +
+  geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE, name = "Beta component") +
+  scale_x_discrete(limits = c("dist.bal", "dist.gra", "dist.bray"), labels = c(expression(beta[bal]), expression(beta[gra]), expression(beta[bray]))) +
+  xlab("Turnover and nestedness components") +
+  ylab(expression("Zooplankton " * beta * "-diversity")) +
+  theme(axis.line = element_line(colour = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank(), panel.background = element_blank(), legend.position = "none")
 
-lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
-                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
-                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
-  mutate(Network=if_else(network1== network2,"Same", "Different"))
+beta.stream.a <- lake.df.filter %>%
+  filter(Network == "Same") %>%
+  ggplot(aes(x = dist.space, y = dist.cwm)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("Spatial dissimilarity") +
+  ylab("CWM distance") +
+  theme(axis.line = element_line(colour = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank(), panel.background = element_blank(), legend.position = "none")
 
-lake.df.filter_mod<-lake.df.filter%>%pivot_longer(cols=dist.bray:dist.gra, names_to="beta_div_comp", values_to ="beta_value" )
-lake.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
+beta.stream.b <- lake.df.filter %>%
+  filter(Network == "Same") %>%
+  ggplot(aes(x = Fish.turnover, y = dist.cwm, fill = Fish.turnover)) +
+  geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE, name = "Fish turnover") +
+  xlab("Fish turnover") +
+  ylab("CWM distance") +
+  theme(axis.line = element_line(colour = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank(), panel.background = element_blank(), legend.position = "none")
 
-
-lake.df.filter%>%
-  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
-  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
-  geom_boxplot()+
-  #facet_grid(~Fish.turnover)+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
-  facet_grid(~var)+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter%>%
-  filter(Network=="Same")%>%
-  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
-  ggplot(aes(x=dist.cwm, y=value,colour=var))+
-  geom_point()+geom_smooth(method="lm")+
-  #facet_grid(~Fish.turnover)+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Variaition in Body Mass")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
-  facet_grid(Fish.turnover~var)+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter%>%
-  filter(Network=="Same")%>%
-  gather(dist.bray,dist.bal,dist.gra,key = "var", value = "value")%>% 
-  ggplot(aes(x=dist.space, y=value,colour=var))+
-  geom_point()+geom_smooth(method="lm")+
-  #facet_grid(~Fish.turnover)+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
-  facet_grid(Fish.turnover~var)+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter%>%
-  filter(Network=="Same")%>%
-  ggplot(aes(x=dist.space, y=dist.cwm))+
-  geom_point()+geom_smooth(method="lm")+
-  #facet_grid(~Fish.turnover)+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Distance CWM")+
-  #facet_grid(~Fish.turnover)+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filtered<-lake.df.filter%>%
-  pivot_longer(dist.bray:dist.gra, names_to ="comp" ,values_to="beta" )
-
-
-beta.a<-lake.df.filtered%>%
-  ggplot(aes(x=comp, y=beta,fill=comp))+
-  geom_boxplot()+
-  #facet_grid(~Fish.turnover)+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  scale_x_discrete(limits = c("dist.bal","dist.gra","dist.bray"), labels=c(expression(beta[bal]),expression(beta[gra]),expression(beta[bray])))+
-  xlab("Turnover and Nestedness Components")+
-  #ggtitle("a)") +
-  #geom_signif(comparisons = list(c("dist.bal", "dist.gra")), map_signif_level=TRUE)+
-  labs(y=(("Zooplankton \u03B2-diversity")))+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-
-#betapart presence/absence
-lake.rel_new<-lake.rel%>%mutate()
-
-lake.rel[lake.rel > 0] <- 1
-lake.dist<-beta.multi(lake.rel,index.family="sorensen")
-
-
-lake.dist<-beta.pair(lake.rel,index.family="sorensen")
-lake.dist.beta.sim<-lake.dist$beta.sim
-lake.dist.beta.sne<-lake.dist$beta.sne
-lake.dist.beta.sor<-lake.dist$beta.sor
-
-env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
-lake.dist<-vegdist(env_beta_dist, "euclidean")
-
-lake.dist.sim.df<-matrixConvert(lake.dist.beta.sim, colname = c("site1", "site2", "dist.sim"))
-lake.dist.sne.df<-matrixConvert(lake.dist.beta.sne, colname = c("site1", "site2", "dist.sne"))
-lake.dist.sor.df<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.sor"))
-lake.dist.space<-matrixConvert(lake.dist.beta.sor, colname = c("site1", "site2", "dist.space"))
-
-site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
-site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
-net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
-net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
-
-str(lake.dist.sor.df)
-
-
-str(lake.dist.space)
-
-lake.df<-lake.dist.sim.df%>%left_join(lake.dist.sne.df,  by=c("site1", "site2"))%>%left_join(lake.dist.sor.df,  by=c("site1", "site2"))%>%left_join(lake.dist.space,  by=c("site1", "site2"))%>%
-  left_join(site.fish.1, by="site1")%>%left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
-
-lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
-                                                       "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
-                                                                           "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                                 "Nofish2noFish","NoFish2fish"))))%>%
-  mutate(Network=if_else(network1== network2,"Same", "Different"))
-
-lake.df.filter%>%
-  gather(dist.sim ,dist.sne,dist.sor,key = "var", value = "value")%>% 
-  ggplot(aes(x=Fish.turnover, y=value,fill=Fish.turnover))+
-  geom_boxplot()+
-  #facet_grid(~Fish.turnover)+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("c)") +
-  ylab("Beta Diversity")+
-  facet_grid(~var)+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter_mod<-lake.df.filter%>%pivot_longer(cols=dist.sim:dist.sor, names_to="beta_div_comp", values_to ="beta_value" )
-beta.a<-lake.df.filter_mod%>%
-  ggplot(aes(x=beta_div_comp, y=beta_value,fill=beta_div_comp))+
-  geom_boxplot()+
-  #facet_grid(~Fish.turnover)+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  #scale_x_discrete(labels=c("dist.sim" = "Bsim", "dist.sne" = "Bsne","dist.sor" = "Bsor"))+
-  scale_x_discrete(labels=c(expression(beta[sim]),expression(beta[sne]),expression(beta[sor])))+
-  xlab("Turnover and Nestedness Components")+
-  ggtitle("a)") +
-  ylab("Zooplankton Beta Diversity")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter%>%
-  #filter(Network=="Same")%>%
-  #gather(dist.sim ,dist.sne,dist.sor,key = "var", value = "value")%>% 
-  ggplot(aes(x=dist.sim, y=dist.sne))+#,colour=Fish.turnover))+
-  geom_point()+
-  geom_smooth(method="lm")+
-  #facet_grid(~Fish.turnover)+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("a)") +
-  ylab("Beta Diversity")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-lake.df.filter_mod%>%group_by(beta_div_comp)%>%summarise(mean.beta=mean(beta_value))
-
-####################################################################################################################################################################################################################################################################################################
-#Beta
-sp_abund_env_filter<-sp_abund_env%>%filter(lake_elevation_nbr >1800, lake_elevation_nbr <3500)%>%
-  filter(HA>=0.5)%>%filter(lake_max_depth>3)
-
-species<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(Alona_spp.:Trichotria_spp.))
-lake.rel<-decostand(species,"total") #standardize community data
-lake.bray<-vegdist(lake.rel) 
-
-env_beta_dist<-sp_abund_env_filter%>%column_to_rownames("lake_id")%>%dplyr::select(c(lake_elevation_nbr,Lon,Lat))
-lake.dist<-vegdist(env_beta_dist, "euclidean")
-
-plot(spatial.dist,lake.bray, pch=16 ,xlab="Spatial Dissimilairty (euclidean)",ylab="Zooplankton dissimilarity (bray-curtis)", ylim=c(0,1))
-
-lake.bray.df<-matrixConvert(lake.bray, colname = c("site1", "site2", "cmtny.dist"))
-lake.dist.df<-matrixConvert(lake.dist, colname = c("site1", "site2", "spatial.dist"))
-
-site.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site1="lake_id")%>%dplyr::rename(fish1="actual_fish_presence")
-site.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_id,actual_fish_presence))%>%dplyr::rename(site2="lake_id")%>%dplyr::rename(fish2="actual_fish_presence")
-net.fish.1<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network1="lake_drainage_name")%>%dplyr::rename(site1="lake_id")
-net.fish.2<-sp_abund_env_filter%>%dplyr::select(c(lake_drainage_name,lake_id))%>%dplyr::rename(network2="lake_drainage_name")%>%dplyr::rename(site2="lake_id")
-
-lake.df<-lake.bray.df%>%left_join(lake.dist.df,  by=c("site1", "site2"))%>%left_join(site.fish.1, by="site1")%>%
-  left_join(site.fish.2, by="site2")%>%left_join(net.fish.1, by="site1")%>%left_join(net.fish.2, by="site2")
-
-lake.df.filter<-lake.df%>%mutate(Fish.turnover=if_else(fish1== "Yes" & fish2== "Yes", 
-                                                           "Fish2fish",if_else(fish1== "Yes" & fish2== "No",
-                                                                               "Fish2nofish",if_else(fish1== "No" & fish2== "No",
-                                                                                                     "Nofish2noFish","NoFish2fish"))))%>%
-  mutate(Network=if_else(network1== network2,"Same", "Different"))%>%
-  filter(Network=="Same")
-
-
-beta.stream.a<-lake.df.filter%>%
-  filter(Network=="Same")%>%
-  ggplot(aes(x=spatial.dist, y=cmtny.dist))+#,colour=Fish.turnover))+
-  geom_point()+
-  geom_smooth(method="lm")+
-  #facet_grid(~Fish.turnover)+
-  scale_colour_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Spatial Dissimilarity")+
-  ggtitle("a)") +
-  ylab("Beta Diversity")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-beta.stream.b<-lake.df.filter%>%
-  filter(Network=="Same")%>%
-  ggplot(aes(x=Fish.turnover, y=cmtny.dist, fill=Fish.turnover))+
-  geom_boxplot()+
-  scale_fill_viridis(discrete = TRUE,name = "Fish Turnover")+
-  xlab("Fish Turnover")+
-  ggtitle("b)") +
-  ylab("Beta Diversity")+
-  theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_blank(),panel.background = element_blank())+ theme(legend.position = "none")
-
-dog<-lm(cmtny.dist ~ spatial.dist*Fish.turnover,lake.df.filter)
+dog <- lm(dist.cwm ~ dist.space * Fish.turnover, lake.df.filter)
 summary(dog)
 
-dog<-lm(cmtny.dist ~ spatial.dist,lake.df.filter)
+dog <- lm(dist.cwm ~ dist.space, lake.df.filter)
 summary(dog)
 
-dog<-glm(cmtny.dist ~ Fish.turnover,family=gaussian(link="identity"),lake.df.filter)
+dog <- glm(dist.cwm ~ Fish.turnover, family = gaussian(link = "identity"), lake.df.filter)
 summary(dog)
 r2(dog)
-####################################################################################################################################################################################################################################################################################################
