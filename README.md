@@ -1,48 +1,81 @@
 # Chapter3
 
-Title: Effects of fish on stream macroinvertebrate and lake zooplankton communities
+Title: Non-native trout have weak effects on zooplankton diversity but strong effects on community biomass
 
-Status of MS: In Prep
+Status of MS: Under Review — *Limnology and Oceanography* (LO-24-0348.R1)
 
-Authors: Matthew D. Green, David B. Herbst, and Kurt E. Anderson
+Authors: Matthew D. Green and Kurt E. Anderson
+
+
+# How to Reproduce
+
+Run the scripts **in order** from the project root:
+
+```r
+setwd("/Users/matthewgreen/Library/CloudStorage/Dropbox/Manuscipts/Chapter 3/Chapter3")
+source("code/new_lake_analysis.R")   # ~5–10 min (downloads EDI data)
+source("code/new_lake_analytics.R")  # builds all figures + models + saves PNGs
+```
+
+`new_lake_plotting.R` is now a thin wrapper that can optionally re-save figures from a loaded RData, but all figures are already saved by `new_lake_analytics.R`.
 
 
 # Structure of Code
 
-1) `code/new_lake_analysis.R` - download and process lake zooplankton and environmental data
-2) `code/new_lake_analytics.R` - build lake analysis objects and construct figure components
-3) `code/new_lake_models.R` - fit lake models for manuscript tables and summaries
-4) `code/new_lake_plotting.R` - save explicit manuscript figure PNGs with stable names
-5) `code/Plotting.R` - legacy figure export script for the original manuscript workflow
+| Script | Purpose |
+|--------|---------|
+| `code/Download_Slip_Data.R` | Downloads all 13 EDI data tables (edi.577.2) |
+| `code/new_lake_analysis.R` | Processes raw data → `data/new_lake_processed.RData` |
+| `code/new_lake_analytics.R` | Builds all manuscript figures + models → `data/new_lake_analytics.RData` + saves PNGs to `Newfigs/` |
+| `code/new_lake_plotting.R` | Optional: re-save figures from `new_lake_analytics.RData` |
+| `code/Lake.analysis.R` | Full legacy + current analysis (used interactively) |
+| `code/Plotting.R` | Legacy figure export script |
+
+
+# Density Calculation
+
+Zooplankton density (individuals/L):
+
+```
+density = (Counts / Max.Subsample) × sample_vol
+          ─────────────────────────────────────────
+          zoo_tow_depth × zoo_tow_number × 33.02
+```
+
+- `sample_vol` comes from `dt13` (lab processing table) joined via **`collect_date`** (not `survey_date`, which is NA for most dt13 rows).
+- Diversity metrics (N0, Shannon H, N1, LCBD) are computed from **subsample-corrected counts** so that the `sample_vol` join never causes NA diversity even for the ~128 sites where dt13 has no matching record.
+- `Com.Size` (total density) uses the density-based matrix and will be 0 for those 128 sites.
+
 
 # Data
 
-1) Zooplankton data (Knapp et al. 2020) used in this study can be accessed from Environmental Data Initiative at https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2. 
+1. Zooplankton data (Knapp et al. 2020): <https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2>
+2. Macroinvertebrate data (Green et al. 2022): <https://doi.org/10.5061/dryad.2fqz612qw>
 
-2) Macroinvertebrate data (Green et al. 2022) can be accessed from Dryad at https://doi.org/10.5061/dryad.2fqz612qw.
+
+# Output Figures (saved to `Newfigs/`)
+
+| File | Manuscript Figure | Description |
+|------|-------------------|-------------|
+| `Figure1.png` | Fig 1 (a–d) | Shannon diversity + LCBD × fish presence (boxplots) and elevation (scatter) |
+| `Figure2.png` | Fig 2 | Beta-diversity components: β_bal (turnover), β_gra (nestedness), β_bray (total) |
+| `Figure3.png` | Fig 3 | Relative change in species density vs log body mass |
+| `Figure4.png` | Fig 4 | Community weighted mean (CWM) body mass by fish presence |
+| `FigureS1.png` | Fig S1 | Fish presence vs elevation + lake site counts |
+| `FigureS2.png` | Fig S2 | Species log density (a) + proportion of lakes occupied (b), ordered by body size |
+| `FigureS3.png` | Fig S3 | Body mass of species absent from fish or fishless sites |
+| `FigureS4.png` | Fig S4 | CWM vs elevation, faceted by fish presence |
 
 
-# Results
+# Models (saved in `data/new_lake_analytics.RData`)
 
-### Current generated lake figures
-- `fig2a.png` — Lake diversity by fish presence: Shannon diversity
-- `fig2b.png` — Lake diversity by fish presence: beta-diversity (LCBD)
-- `fig2c.png` — Lake diversity by fish presence: community size
-- `fig2d.png` — Lake diversity by fish presence: community biomass
-- `fig3a.png` — Lake diversity along elevation: Shannon diversity
-- `fig3b.png` — Lake diversity along elevation: beta-diversity (LCBD)
-- `fig3c.png` — Lake diversity along elevation: community size
-- `fig3d.png` — Lake diversity along elevation: community biomass
-- `fig2_panel.png` — combined lake figure panel for Fig 2
-- `fig3_panel.png` — combined lake figure panel for Fig 3
-- `supp1.png` — supplemental fish presence / elevation figure
+| Object | Table | Response | Predictors |
+|--------|-------|----------|------------|
+| `m_N1_*` + `table1_N1` | Table 1 | Shannon diversity (N1) | elevation, fish, interaction, null |
+| `m_LCBD_*` + `table1_LCBD` | Table 1 | LCBD | elevation, fish, interaction, null |
+| `m_beta_*` + `table2_beta` | Table 2 | β diversity component | bal vs gra |
+| `m_density_*` + `table3_density` | Table 3 | Relative density change | log body mass, null |
+| `m_CWM_*` + `table4_CWM` | Table 4 | CWM | fish × elevation, elevation, fish, null |
+| `m_absent_*` + `tableS3_absent` | Table S3 | Log body mass | absent from fish vs fishless |
 
-### Notes
-- The zooplankton density calculation is implemented in `code/new_lake_analysis.R` as `Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02)`.
-- Figure outputs are saved to the project root when `code/new_lake_plotting.R` is run.
-
-# Supplemental
-
-### Fig S1: Fish presence as a function of elevation (m) for lakes and streams.
-`code/new_lake_plotting.R` saves `supp1.png` for the current lake supplemental figure.
 
