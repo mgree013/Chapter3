@@ -1,34 +1,59 @@
 # new_lake_plotting.R
-# Load analytics objects and save manuscript figure PNGs with explicit names.
+# Save all manuscript figures as high-resolution PNGs.
 
-Packages <- c(
-  "cowplot", "tidyverse"
-)
+Packages <- c("cowplot", "ggplot2")
 missing_packages <- Packages[!(Packages %in% installed.packages()[,"Package"])]
 if (length(missing_packages)) install.packages(missing_packages)
 lapply(Packages, library, character.only = TRUE)
 
 load("data/new_lake_analytics.RData")
-# Manuscript base theme (match legacy Plotting.R aesthetics)
-theme_base <- theme(axis.line = element_line(colour = "black"),
-                   panel.grid.major = element_blank(),
-                   panel.grid.minor = element_blank(),
-                   panel.border = element_blank(),
-                   panel.background = element_blank())
-ggsave("fig2a.png", plot = fig2a, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig2b.png", plot = fig2b, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig2c.png", plot = fig2c, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig2d.png", plot = fig2d + theme_base, width = 12, height = 10, dpi = 600, units = "cm")
 
-ggsave("fig3a.png", plot = fig3a, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig3b.png", plot = fig3b, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig3c.png", plot = fig3c, width = 12, height = 10, dpi = 600, units = "cm")
-ggsave("fig3d.png", plot = fig3d + theme_base, width = 12, height = 10, dpi = 600, units = "cm")
+dir.create("Newfigs", showWarnings = FALSE)
 
-ggsave("supp1.png", plot = plot_grid(supp.a, supp.b, nrow = 2), width = 25, height = 15, dpi = 600, units = "cm")
+# Figure 1: Shannon diversity and LCBD (4-panel)
+ggsave("Newfigs/Figure1.png",
+       plot = plot_grid(fig1a, fig1b, fig1c, fig1d, nrow = 2),
+       width = 25, height = 20, dpi = 600, units = "cm")
 
-# Save combined figures for convenience
-ggsave("fig2_panel.png", plot = plot_grid(fig2a, fig2b, fig2c, fig2d, nrow = 2), width = 25, height = 20, dpi = 600, units = "cm")
-ggsave("fig3_panel.png", plot = plot_grid(fig3a, fig3b, fig3c, fig3d, nrow = 2), width = 25, height = 20, dpi = 600, units = "cm")
+# Figure 2: Beta diversity components
+ggsave("Newfigs/Figure2.png",
+       plot = fig2,
+       width = 15, height = 12, dpi = 600, units = "cm")
 
-message("new_lake_plotting.R complete: figures saved with explicit manuscript filenames")
+# Figure 3: Relative density change vs body mass
+ggsave("Newfigs/Figure3.png",
+       plot = fig3,
+       width = 15, height = 12, dpi = 600, units = "cm")
+
+# Figure 4: CWM by fish presence
+ggsave("Newfigs/Figure4.png",
+       plot = fig4,
+       width = 12, height = 12, dpi = 600, units = "cm")
+
+# Figure S1: elevation and site counts
+ggsave("Newfigs/FigureS1.png",
+       plot = plot_grid(fig_s1a, fig_s1b, nrow = 1),
+       width = 25, height = 12, dpi = 600, units = "cm")
+
+# Figure S2: species density + occupancy (2-panel)
+ggsave("Newfigs/FigureS2.png",
+       plot = plot_grid(fig_s2a, fig_s2b, nrow = 2),
+       width = 30, height = 30, dpi = 600, units = "cm")
+
+# Figure S3: body mass of absent species
+ggsave("Newfigs/FigureS3.png",
+       plot = fig_s3,
+       width = 12, height = 12, dpi = 600, units = "cm")
+
+# Figure S4: CWM vs elevation by fish presence
+ggsave("Newfigs/FigureS4.png",
+       plot = fig_s4,
+       width = 25, height = 12, dpi = 600, units = "cm")
+
+message("new_lake_plotting.R complete: all manuscript figures saved to Newfigs/")
+
+
+
+
+
+

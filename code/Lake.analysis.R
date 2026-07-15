@@ -51,6 +51,7 @@ clean_zoopzz<-zoopzz%>%
   left_join(dt8.1, by=c("lake_id", "survey_date"))%>%
   left_join(
     dt13 %>%
+      mutate(survey_date = collect_date) %>%
       group_by(lake_id, survey_date) %>%
       summarise(sample_vol = first(sample_vol), .groups = "drop"),
     by = c("lake_id", "survey_date")
@@ -61,14 +62,13 @@ clean_zoopzz<-zoopzz%>%
   group_by(lake_id,survey_date,Species_Name)%>%
   mutate(
     Counts = sum(Number)/Max.Subsample,
-    # Zooplankton density: scale sampled count up by sample_vol, then divide by filtered volume
-    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number),
+    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02),
     Species_Name = str_replace(Species_Name, " ", "_"),
     Species_Name = str_replace(Species_Name, "/", "_")
   )%>%
   filter(Species_Name != "standard_measurement")%>%
-  dplyr::select(lake_id, survey_date, Species_Name, zoop_density)%>%
-  distinct(lake_id, survey_date, Species_Name, zoop_density)
+  dplyr::select(lake_id, survey_date, Species_Name, Counts, zoop_density)%>%
+  distinct(lake_id, survey_date, Species_Name, Counts, zoop_density)
 
 #Biomass
 zoop_body_mass <- av_zoop_body_size_new %>%
@@ -92,13 +92,21 @@ clean_zoopz_biomass<-zoopzz%>%
 
 #########################################################################
 #1B) Pivot Data Set long to wide format for Species abundance Matrix
-site.sp.quad <- cast(clean_zoopzz, lake_id+survey_date ~ Species_Name, value='zoop_density') 
-site.sp.quad <- as.data.frame(site.sp.quad)  #set data set as data frame
-site.sp.quad[is.na(site.sp.quad)] <- 0       #Replace NA's with 0's
+# Count-based matrix: sample_vol cancels in proportions, so N0/H/N1/LCBD are
+# valid for ALL sites regardless of whether sample_vol was matched in dt13.
+site.sp.counts <- cast(clean_zoopzz, lake_id+survey_date ~ Species_Name, value='Counts')
+site.sp.counts <- as.data.frame(site.sp.counts)
+site.sp.counts[is.na(site.sp.counts)] <- 0
 
+# Density-based matrix: needed only for Com.Size (absolute scale).
+site.sp.quad <- cast(clean_zoopzz, lake_id+survey_date ~ Species_Name, value='zoop_density')
+site.sp.quad <- as.data.frame(site.sp.quad)
+site.sp.quad[is.na(site.sp.quad)] <- 0
 
-#Species Diversity as Response Varible: calculate multiple species diversity metrics
-species<-as.data.frame(site.sp.quad[,3:39])   #Select species and abundances only
+#Species Diversity as Response Variable: calculate multiple species diversity metrics
+species      <- as.data.frame(site.sp.counts[, 3:ncol(site.sp.counts)])
+dens_species <- as.data.frame(site.sp.quad[,   3:ncol(site.sp.quad)])
+
 diversity<-species%>%
   transmute(N0=rowSums(species > 0),
             H= diversity(species),
@@ -107,11 +115,11 @@ diversity<-species%>%
             J= H/log(N0),
             E10= (N1/N0),
             E20= (N2/N0),
-            Com.Size=rowSums(species), #Total number individuals per site
-            betas.LCBD=beta.div(species, method="hellinger",sqrt.D=TRUE)$LCBD) #LCBD (Beta-diversity or variability among sites)
+            Com.Size=rowSums(dens_species),
+            betas.LCBD=beta.div(species, method="hellinger",sqrt.D=TRUE)$LCBD)
 
 #Add back site info and treatments to diversity data
-local_diversity<-cbind(diversity, site.sp.quad[,1:2])
+local_diversity<-cbind(diversity, site.sp.counts[,1:2])
 
 clean_zoopz_biomass_site<-clean_zoopz_biomass%>%
   filter(Taxon!="standard_measurement")%>%

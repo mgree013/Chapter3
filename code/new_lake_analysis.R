@@ -11,7 +11,8 @@ lapply(Packages, library, character.only = TRUE)
 if (!file.exists("code/Download_Slip_Data.R")) {
   stop("Run this script from the project root where code/Download_Slip_Data.R exists.")
 }
-
+getwd()
+setwd("/Users/matthewgreen/Library/CloudStorage/Dropbox/Manuscipts/Chapter 3/Chapter3/")
 source("code/Download_Slip_Data.R", echo = FALSE)
 
 if (!dir.exists("data")) dir.create("data")
@@ -28,6 +29,7 @@ clean_zoopzz <- zoopzz %>%
   left_join(dt8.1, by = c("lake_id", "survey_date")) %>%
   left_join(
     dt13 %>%
+      mutate(survey_date = collect_date) %>%
       group_by(lake_id, survey_date) %>%
       summarise(sample_vol = first(sample_vol), .groups = "drop"),
     by = c("lake_id", "survey_date")
@@ -38,13 +40,13 @@ clean_zoopzz <- zoopzz %>%
   group_by(lake_id, survey_date, Species_Name) %>%
   mutate(
     Counts = sum(Number) / Max.Subsample,
-    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number),
+    zoop_density = Counts * sample_vol / (zoo_tow_depth * zoo_tow_number * 33.02),
     Species_Name = str_replace(Species_Name, " ", "_"),
     Species_Name = str_replace(Species_Name, "/", "_")
   ) %>%
   filter(Species_Name != "standard_measurement") %>%
-  dplyr::select(lake_id, survey_date, Species_Name, zoop_density) %>%
-  distinct(lake_id, survey_date, Species_Name, zoop_density)
+  dplyr::select(lake_id, survey_date, Species_Name, Counts, zoop_density) %>%
+  distinct(lake_id, survey_date, Species_Name, Counts, zoop_density)
 
 zoop_body_mass <- av_zoop_body_size_new %>% rownames_to_column("Taxon")
 
@@ -65,11 +67,20 @@ clean_zoopz_biomass <- zoopzz %>%
   mutate(Biomass = Counts * Body_mass_ug) %>%
   dplyr::select(c(lake_id, survey_date, Taxon, Biomass))
 
+# Count-based matrix: sample_vol cancels in proportions, so N0/H/N1/LCBD are
+# valid for ALL 636 sites regardless of whether sample_vol was matched in dt13.
+site.sp.counts <- cast(clean_zoopzz, lake_id + survey_date ~ Species_Name, value = 'Counts')
+site.sp.counts <- as.data.frame(site.sp.counts)
+site.sp.counts[is.na(site.sp.counts)] <- 0
+
+# Density-based matrix: needed only for Com.Size (absolute scale).
 site.sp.quad <- cast(clean_zoopzz, lake_id + survey_date ~ Species_Name, value = 'zoop_density')
 site.sp.quad <- as.data.frame(site.sp.quad)
 site.sp.quad[is.na(site.sp.quad)] <- 0
 
-species <- as.data.frame(site.sp.quad[, 3:ncol(site.sp.quad)])
+species      <- as.data.frame(site.sp.counts[, 3:ncol(site.sp.counts)])
+dens_species <- as.data.frame(site.sp.quad[,   3:ncol(site.sp.quad)])
+
 diversity <- species %>%
   transmute(
     N0 = rowSums(species > 0),
@@ -79,11 +90,11 @@ diversity <- species %>%
     J = H / log(N0),
     E10 = N1 / N0,
     E20 = N2 / N0,
-    Com.Size = rowSums(species),
+    Com.Size = rowSums(dens_species),
     betas.LCBD = beta.div(species, method = "hellinger", sqrt.D = TRUE)$LCBD
   )
 
-local_diversity <- bind_cols(diversity, site.sp.quad[, 1:2])
+local_diversity <- bind_cols(diversity, site.sp.counts[, 1:2])
 
 clean_zoopz_biomass_site <- clean_zoopz_biomass %>%
   filter(Taxon != "standard_measurement", Biomass > 0) %>%
@@ -119,7 +130,8 @@ sp_abund_env <- left_join(site.sp.quad, env, by = c("lake_id", "survey_date")) %
   filter(lake_id != "70534")
 
 pivot_clean_zoopzz <- clean_zoopzz %>%
-  pivot_wider(names_from = "Species_Name", values_from = "zoop_density")
+  pivot_wider(id_cols = c(lake_id, survey_date),
+              names_from = "Species_Name", values_from = "zoop_density")
 
 env_abund <- left_join(clean_zoopzz, env, by = c("lake_id", "survey_date")) %>%
   filter(actual_fish_presence %in% c("Yes", "No"))

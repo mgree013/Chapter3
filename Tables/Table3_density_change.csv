@@ -1,0 +1,3 @@
+"Response","Model","dAIC","df","wi","R2"
+"Relative Change in Zooplankton Counts (>=5% occupancy filter)","~Body Mass",0,3,0.742,0.23
+"Relative Change in Zooplankton Counts (>=5% occupancy filter)","~1",2.1,2,0.258,0

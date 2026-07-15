@@ -1,0 +1,5 @@
+"Response","Model","dAIC","df","wi","R2"
+"Zooplankton CWM","~Fish*Elevation",0,5,1,0.35
+"Zooplankton CWM","~Elevation",27.2,3,0,0.25
+"Zooplankton CWM","~Fish",81.6,3,0,0.05
+"Zooplankton CWM","~1",92.6,2,0,0
