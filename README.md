@@ -1,11 +1,12 @@
 # Chapter3
 
-Title: Non-native trout have weak effects on zooplankton diversity but strong effects on community biomass
+Title: Trout have weak effects on zooplankton diversity but strong effects on community biomass
 
-Status of MS: Under Review — *Limnology and Oceanography* (LO-24-0348.R1)
+Status of MS: Limnology and Oceanography 
 
 Authors: Matthew D. Green and Kurt E. Anderson
 
+Link: https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lno.70041
 
 # How to Reproduce
 
@@ -49,9 +50,7 @@ density = (Counts / Max.Subsample) × sample_vol
 
 # Data
 
-1. Zooplankton data (Knapp et al. 2020): <https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2>
-2. Macroinvertebrate data (Green et al. 2022): <https://doi.org/10.5061/dryad.2fqz612qw>
-
+Zooplankton data (Knapp et al. 2020): <https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=577&revision=2>
 
 # Output Figures (saved to `Newfigs/`)
 
